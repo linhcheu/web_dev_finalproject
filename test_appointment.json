@@ -1,0 +1,7 @@
+{
+  "hospital_id": 4,
+  "appointment_date": "2025-07-15",
+  "appointment_time": "10:00",
+  "reason": "Regular checkup",
+  "notes": "Test appointment creation"
+}

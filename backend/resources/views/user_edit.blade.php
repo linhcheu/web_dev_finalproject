@@ -379,6 +379,180 @@
             margin-top: 10px;
         }
 
+        /* Enhanced Image Upload Styles */
+        .image-upload-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.02);
+        }
+        
+        .upload-area.dragover::after {
+            content: 'Drop image here';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 10;
+        }
+        
+        .upload-area.has-image {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .upload-area.has-image .upload-text {
+            color: #10b981;
+        }
+        
+        .upload-area.has-image .upload-hint {
+            color: #059669;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .upload-hint {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .upload-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .upload-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .upload-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .paste-hint {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .profile-picture.updated {
+            border-color: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            animation: pulse 0.6s ease-in-out;
+        }
+        
+        .preview-status {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .preview-status.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .image-ready-indicator {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .image-ready-indicator.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .basic-info-section {
             background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             padding: 30px;
@@ -489,6 +663,14 @@
             label, input, select, textarea {
                 font-size: 14px !important;
             }
+            .upload-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            .upload-btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 
@@ -538,26 +720,52 @@
                     @method('PUT')
                     <input type="hidden" name="update_type" value="profile_picture">
 
-                    <div class="profile-picture-container">
-                        <img src="{{ asset('storage/' . $user->profile_picture) }}"
-                             onerror="this.onerror=null;this.src='http://127.0.0.1:8000/storage/{{ $user->profile_picture }}';"
-                             alt="Profile Picture" class="profile-picture" id="profile-preview">
-                        <button type="button" class="profile-picture-upload" onclick="document.getElementById('profile_picture').click()">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
+                    <div class="image-upload-container" data-input-name="profile_picture">
+                        <div class="profile-picture-container">
+                            <div style="position: relative; display: inline-block;">
+                                @if($user->profile_picture)
+                                    <img src="{{ asset('storage/' . $user->profile_picture) }}?v={{ time() }}" alt="Profile Picture" class="profile-picture" id="profile-preview">
+                                    <!-- Debug: {{ $user->profile_picture }} -->
+                                    <!-- Debug URL: {{ asset('storage/' . $user->profile_picture) }} -->
+                                @else
+                                    <img src="{{ asset('images/default-profile.jpg') }}?v={{ time() }}" alt="Default Profile" class="profile-picture" id="profile-preview">
+                                    <!-- Debug: No profile picture found -->
+                                @endif
+                                <div class="preview-status" id="profile-status">NEW</div>
+                            </div>
+                        </div>
 
-                    <input type="file" id="profile_picture" name="profile_picture" class="profile-picture-input" accept="image/*">
-                    
-                    <div class="profile-picture-info">
-                        Supported formats: JPEG, PNG, JPG, GIF (Max: 2MB)
-                    </div>
+                        <div class="upload-area" id="profile-upload-area">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">Upload Profile Picture</div>
+                            <div class="upload-hint">Drag & drop, paste from clipboard, or click to browse</div>
+                            <div class="upload-options">
+                                <button type="button" class="upload-btn" onclick="document.getElementById('profile_picture').click()">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Browse Files
+                                </button>
+                                <button type="button" class="upload-btn" onclick="pasteFromClipboard('profile_picture')">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Paste Image
+                                </button>
+                            </div>
+                        </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Update Profile Picture</button>
+                        <input type="file" id="profile_picture" name="profile_picture" class="file-input" accept="image/*">
+                        <div class="image-ready-indicator" id="profile-ready-indicator">✓ Image Ready to Update</div>
+                        
+                        <div class="profile-picture-info">
+                            Supported formats: JPEG, PNG, JPG, GIF (Max: 2MB)
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Update Profile Picture</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -674,10 +882,277 @@
             <div class="flex justify-end space-x-4 mt-8">
                 <a href="{{ route('user.management') }}" class="btn btn-secondary">Back to User Management</a>
             </div>
+            
+            <!-- Debug Section -->
+          
+          
         </div>
     </div>
 
     <script>
+        // Enhanced Image Upload Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing user image upload...');
+            
+            // Initialize upload area
+            initializeUploadArea();
+            
+            // Global paste listener
+            document.addEventListener('paste', handleGlobalPaste);
+            
+            // Global drag and drop listener
+            document.addEventListener('dragover', handleGlobalDragOver);
+            document.addEventListener('drop', handleGlobalDrop);
+        });
+
+        function initializeUploadArea() {
+            console.log('Initializing user upload area...');
+            const uploadArea = document.getElementById('profile-upload-area');
+            const input = document.getElementById('profile_picture');
+            const preview = document.getElementById('profile-preview');
+            
+            console.log('Upload area found:', !!uploadArea);
+            console.log('Input found:', !!input);
+            console.log('Preview found:', !!preview);
+            
+            if (!uploadArea || !input || !preview) {
+                console.error('Missing required elements for image upload');
+                return;
+            }
+            
+            // Drag and drop for upload area
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+                console.log('Drag over upload area');
+            });
+            
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                console.log('File dropped on upload area');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0], input, preview);
+                }
+            });
+            
+            // File input change
+            input.addEventListener('change', (e) => {
+                console.log('File input changed:', e.target.files.length, 'files');
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0], input, preview);
+                }
+            });
+        }
+
+        function handleGlobalPaste(e) {
+            console.log('Global paste event');
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const file = item.getAsFile();
+                    if (file) {
+                        console.log('Image pasted:', file.name, file.type);
+                        const input = document.getElementById('profile_picture');
+                        const preview = document.getElementById('profile-preview');
+                        
+                        handleFileUpload(file, input, preview);
+                        showPasteHint('Image pasted successfully!');
+                    }
+                }
+            }
+        }
+
+        function handleGlobalDragOver(e) {
+            e.preventDefault();
+            if (e.target.closest('.upload-area')) {
+                e.target.closest('.upload-area').classList.add('dragover');
+            }
+        }
+
+        function handleGlobalDrop(e) {
+            e.preventDefault();
+            const uploadArea = e.target.closest('.upload-area');
+            if (uploadArea) {
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const input = document.getElementById('profile_picture');
+                    const preview = document.getElementById('profile-preview');
+                    
+                    handleFileUpload(files[0], input, preview);
+                }
+            }
+        }
+
+        function pasteFromClipboard(inputId) {
+            console.log('Paste from clipboard called for:', inputId);
+            navigator.clipboard.read().then(data => {
+                for (let item of data) {
+                    for (let type of item.types) {
+                        if (type.startsWith('image/')) {
+                            item.getType(type).then(blob => {
+                                const file = new File([blob], 'pasted-image.png', { type: type });
+                                const input = document.getElementById(inputId);
+                                const preview = document.getElementById('profile-preview');
+                                
+                                handleFileUpload(file, input, preview);
+                                showPasteHint('Image pasted successfully!');
+                            });
+                            return;
+                        }
+                    }
+                }
+                showPasteHint('No image found in clipboard');
+            }).catch(err => {
+                console.error('Clipboard error:', err);
+                showPasteHint('Failed to read clipboard. Try copying an image first.');
+            });
+        }
+
+        function handleFileUpload(file, input, preview) {
+            console.log('Handling file upload:', file.name, file.type, file.size);
+            console.log('Preview element:', preview);
+            console.log('Input element:', input);
+            
+            // Validate file size (2MB = 2 * 1024 * 1024 bytes)
+            if (file.size > 2 * 1024 * 1024) {
+                showPasteHint('File size must be less than 2MB');
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showPasteHint('Please select a valid image file (JPEG, PNG, JPG, GIF)');
+                return;
+            }
+
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                console.log('File read successfully, updating preview');
+                console.log('Preview element before update:', preview);
+                console.log('New image data:', e.target.result.substring(0, 50) + '...');
+                
+                // Update the preview image
+                preview.src = e.target.result;
+                
+                // Force a reflow to ensure the image updates
+                preview.style.display = 'none';
+                preview.offsetHeight; // Trigger reflow
+                preview.style.display = '';
+                
+                // Add updated class and show status
+                preview.classList.add('updated');
+                
+                // Show status badge
+                const status = document.getElementById('profile-status');
+                if (status) {
+                    status.textContent = 'NEW';
+                    status.classList.add('show');
+                    console.log('Status badge updated');
+                }
+                
+                // Show ready indicator
+                const readyIndicator = document.getElementById('profile-ready-indicator');
+                if (readyIndicator) {
+                    readyIndicator.classList.add('show');
+                    console.log('Ready indicator shown');
+                }
+                
+                // Update upload area appearance
+                const uploadArea = document.getElementById('profile-upload-area');
+                if (uploadArea) {
+                    uploadArea.classList.add('has-image');
+                    console.log('Upload area updated');
+                }
+                
+                // Animation
+                preview.style.animation = 'pulse 0.6s ease-in-out';
+                setTimeout(() => {
+                    preview.style.animation = '';
+                }, 600);
+                
+                console.log('Preview updated successfully');
+                console.log('Preview src after update:', preview.src);
+            };
+            
+            reader.onerror = function(e) {
+                console.error('Error reading file:', e);
+                showPasteHint('Error reading file');
+            };
+            
+            reader.readAsDataURL(file);
+
+            // Update the file input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            input.files = dataTransfer.files;
+            
+            console.log('File input updated');
+        }
+
+        function showPasteHint(message) {
+            console.log('Showing hint:', message);
+            const hint = document.createElement('div');
+            hint.className = 'paste-hint';
+            hint.textContent = message;
+            document.body.appendChild(hint);
+            
+            setTimeout(() => {
+                hint.remove();
+            }, 3000);
+        }
+
+        // Test Functions
+        function testElements() {
+            console.log('=== Testing Elements ===');
+            const input = document.getElementById('profile_picture');
+            const preview = document.getElementById('profile-preview');
+            
+            console.log('Input found:', !!input);
+            console.log('Preview found:', !!preview);
+            
+            if (preview) {
+                console.log('Preview src:', preview.src);
+                console.log('Preview style:', preview.style.cssText);
+            }
+        }
+
+        function testImageUpdate() {
+            console.log('=== Testing Image Update ===');
+            const preview = document.getElementById('profile-preview');
+            if (preview) {
+                console.log('Current src:', preview.src);
+                // Test with a simple data URL
+                preview.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0icmVkIi8+PC9zdmc+';
+                console.log('Updated src:', preview.src);
+                preview.classList.add('updated');
+                console.log('Added updated class');
+            } else {
+                console.error('Preview not found');
+            }
+        }
+
+        function testFileInput() {
+            console.log('=== Testing File Input ===');
+            const input = document.getElementById('profile_picture');
+            if (input) {
+                console.log('File input found, triggering click');
+                input.click();
+            } else {
+                console.error('File input not found');
+            }
+        }
+
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
             const button = input.nextElementSibling;
@@ -696,39 +1171,5 @@
                 `;
             }
         }
-
-        // Profile picture preview functionality
-        document.getElementById('profile_picture').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('profile-preview');
-            
-            if (file) {
-                // Validate file size (2MB = 2 * 1024 * 1024 bytes)
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('File size must be less than 2MB');
-                    this.value = '';
-                    return;
-                }
-
-                // Validate file type
-                const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Please select a valid image file (JPEG, PNG, JPG, GIF)');
-                    this.value = '';
-                    return;
-                }
-
-                // Create preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.animation = 'pulse 0.5s ease-in-out';
-                    setTimeout(() => {
-                        preview.style.animation = '';
-                    }, 500);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
     </script>
 @endsection 

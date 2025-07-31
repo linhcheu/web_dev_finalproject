@@ -15,16 +15,7 @@ abstract class Controller
             'password' => ['required'],
         ]);
 
-        // Hardcoded admin credentials (for demo)
-        $adminEmail = 'admin@careconnect.com';
-        $adminPassword = 'admin123';
-
-        if ($credentials['email'] === $adminEmail && $credentials['password'] === $adminPassword) {
-            // In a real app, set session or guard here
-            return redirect('/')->with('success', 'Welcome, Admin!');
-        } else {
-            return redirect()->route('admin.login.form')->with('error', 'Invalid credentials.');
-        }
+    
     }
 
     public function updateProfile(Request $request)

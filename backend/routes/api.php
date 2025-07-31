@@ -2,66 +2,112 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\AppointmentController;
-use App\Http\Controllers\Api\HospitalController;
-use App\Http\Controllers\Api\FeedbackController;
-use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\HospitalController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
+| These routes are for the backend admin panel API functionality
+| All routes return JSON responses
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Test route to verify backend API is working
+Route::get('/test', function() {
+    return response()->json([
+        'success' => true,
+        'message' => 'Backend API is working!',
+        'timestamp' => now(),
+        'service' => 'CareConnect Backend API'
+    ]);
 });
 
-// Public routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+// Admin Authentication Routes
+Route::prefix('auth')->group(function () {
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm']);
+    Route::post('/login', [AdminAuthController::class, 'login']);
+});
 
-// Protected routes
-Route::middleware('auth:sanctum')->group(function () {
-    // User management
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{user}', [UserController::class, 'show']);
-    Route::put('/users/{user}', [UserController::class, 'update']);
-    Route::delete('/users/{user}', [UserController::class, 'destroy']);
-    Route::put('/profile', [UserController::class, 'updateProfile']);
+// Protected Admin Routes - Require Authentication
+Route::middleware(['auth:sanctum'])->group(function () {
     
-    // Appointments
-    Route::get('/appointments', [AppointmentController::class, 'index']);
-    Route::post('/appointments', [AppointmentController::class, 'store']);
-    Route::get('/appointments/{appointment}', [AppointmentController::class, 'show']);
-    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update']);
-    Route::delete('/appointments/{appointment}', [AppointmentController::class, 'destroy']);
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index']);
     
-    // Hospitals
-    Route::get('/hospitals', [HospitalController::class, 'index']);
-    Route::post('/hospitals', [HospitalController::class, 'store']);
-    Route::get('/hospitals/{hospital}', [HospitalController::class, 'show']);
-    Route::put('/hospitals/{hospital}', [HospitalController::class, 'update']);
-    Route::delete('/hospitals/{hospital}', [HospitalController::class, 'destroy']);
+    // Authentication
+    Route::post('/auth/logout', [AdminAuthController::class, 'logout']);
     
-    // Feedback
-    Route::get('/feedback', [FeedbackController::class, 'index']);
-    Route::post('/feedback', [FeedbackController::class, 'store']);
-    Route::get('/feedback/{feedback}', [FeedbackController::class, 'show']);
-    Route::put('/feedback/{feedback}', [FeedbackController::class, 'update']);
-    Route::delete('/feedback/{feedback}', [FeedbackController::class, 'destroy']);
+    // Appointment Management
+    Route::prefix('appointments')->group(function () {
+        Route::get('/', [AppointmentController::class, 'index']);
+        Route::get('/{id}', [AppointmentController::class, 'show']);
+        Route::get('/{id}/edit', [AppointmentController::class, 'edit']);
+        Route::put('/{id}', [AppointmentController::class, 'update']);
+        Route::delete('/{id}', [AppointmentController::class, 'destroy']);
+    });
     
-    // Subscriptions
-    Route::get('/subscriptions', [SubscriptionController::class, 'index']);
-    Route::post('/subscriptions', [SubscriptionController::class, 'store']);
-    Route::get('/subscriptions/{subscription}', [SubscriptionController::class, 'show']);
-    Route::put('/subscriptions/{subscription}', [SubscriptionController::class, 'update']);
-    Route::delete('/subscriptions/{subscription}', [SubscriptionController::class, 'destroy']);
-}); 
+    // User Management
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index']);
+        Route::get('/create', [UserManagementController::class, 'create']);
+        Route::post('/', [UserManagementController::class, 'store']);
+        Route::get('/{id}', [UserManagementController::class, 'show']);
+        Route::get('/{id}/edit', [UserManagementController::class, 'edit']);
+        Route::put('/{id}', [UserManagementController::class, 'update']);
+        Route::delete('/{id}', [UserManagementController::class, 'destroy']);
+    });
+    
+    // Hospital Management
+    Route::prefix('hospitals')->group(function () {
+        Route::get('/', [HospitalController::class, 'index']);
+        Route::get('/create', [HospitalController::class, 'create']);
+        Route::post('/', [HospitalController::class, 'store']);
+        Route::get('/{id}', [HospitalController::class, 'show']);
+        Route::get('/{id}/edit', [HospitalController::class, 'edit']);
+        Route::put('/{id}', [HospitalController::class, 'update']);
+        Route::delete('/{id}', [HospitalController::class, 'destroy']);
+    });
+    
+    // Feedback Management
+    Route::prefix('feedback')->group(function () {
+        Route::get('/', [FeedbackController::class, 'index']);
+        Route::get('/statistics', [FeedbackController::class, 'statistics']);
+        Route::get('/{id}', [FeedbackController::class, 'show']);
+        Route::delete('/{id}', [FeedbackController::class, 'destroy']);
+    });
+    
+    // Subscription Management
+    Route::prefix('subscriptions')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index']);
+        Route::get('/{id}', [SubscriptionController::class, 'show']);
+        Route::put('/{id}', [SubscriptionController::class, 'update']);
+        Route::delete('/{id}', [SubscriptionController::class, 'destroy']);
+    });
+    
+    // Profile Management
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'show']);
+        Route::get('/edit', [ProfileController::class, 'edit']);
+        Route::put('/', [ProfileController::class, 'update']);
+    });
+});
+
+// API fallback for 404s
+Route::fallback(function() {
+    return response()->json([
+        'success' => false,
+        'message' => 'Backend API endpoint not found',
+        'debug' => [
+            'path' => request()->path(),
+            'method' => request()->method(),
+            'url' => request()->fullUrl()
+        ]
+    ], 404);
+});

@@ -198,8 +198,7 @@
             color: #dc2626;
             font-size: 13px;
             margin-top: 8px;
-            display: flex;
-            align-items: center;
+            font-weight: 500;
         }
 
         .error::before {
@@ -340,75 +339,114 @@
         }
 
         /* Responsive styles */
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .main {
-                padding: 1rem !important;
+                padding: 20px;
             }
+            
             .form-container {
-                padding: 20px !important;
-                max-width: 98vw !important;
+                padding: 30px;
+                max-width: 90%;
             }
-            .appointment-info {
-                padding: 12px !important;
-            }
+            
             .appointment-info-grid {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 12px;
             }
         }
-        @media (max-width: 640px) {
+        
+        @media (max-width: 768px) {
             .main {
-                padding: 0.5rem !important;
+                padding: 15px;
             }
+            
             .form-container {
-                padding: 10px !important;
-                max-width: 100vw !important;
+                padding: 25px;
+                max-width: 95%;
             }
+            
             .appointment-info {
-                padding: 6px !important;
+                padding: 20px;
             }
+            
             .appointment-info-grid {
-                grid-template-columns: 1fr !important;
-                gap: 6px !important;
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
             .form-group input,
             .form-group select,
             .form-group textarea {
-                font-size: 14px !important;
-                padding: 10px 8px !important;
+                padding: 12px 16px;
+                font-size: 14px;
             }
+            
             .btn {
-                padding: 10px 16px !important;
-                font-size: 14px !important;
-                margin-right: 8px !important;
+                padding: 12px 24px;
+                font-size: 14px;
+                margin-right: 10px;
+                margin-bottom: 10px;
             }
-            .page-title {
-                font-size: 20px !important;
+            
+            .info-value {
+                word-break: break-word;
+                overflow-wrap: break-word;
             }
         }
+        
         @media (max-width: 480px) {
             .main {
-                padding: 0.25rem !important;
+                padding: 10px;
             }
+            
             .form-container {
-                padding: 4px !important;
+                padding: 20px;
+                max-width: 100%;
             }
+            
             .appointment-info {
-                padding: 2px !important;
+                padding: 15px;
             }
+            
+            .appointment-info h4 {
+                font-size: 16px;
+                margin-bottom: 15px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group label {
+                font-size: 13px;
+            }
+            
             .form-group input,
             .form-group select,
             .form-group textarea {
-                font-size: 12px !important;
-                padding: 6px 4px !important;
+                padding: 10px 12px;
+                font-size: 13px;
             }
+            
             .btn {
-                padding: 8px 8px !important;
-                font-size: 12px !important;
-                margin-right: 4px !important;
+                padding: 10px 20px;
+                font-size: 13px;
+                margin-right: 8px;
+                margin-bottom: 8px;
+                width: 100%;
+                display: block;
             }
-            .page-title {
-                font-size: 16px !important;
+            
+            .info-label {
+                font-size: 11px;
+            }
+            
+            .info-value {
+                font-size: 13px;
             }
         }
     </style>
@@ -437,7 +475,7 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Hospital</span>
-                        <span class="info-value">{{ $appointment->hospital->name }}</span>
+                        <span class="info-value">{{ $appointment->hospital->name }}<br><small>{{ $appointment->hospital->province ?? 'N/A' }}</small></span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Status</span>
@@ -486,7 +524,7 @@
                             <option value="">Select Hospital</option>
                             @foreach($hospitals as $hospital)
                                 <option value="{{ $hospital->hospital_id }}" {{ old('hospital_id', $appointment->hospital_id) == $hospital->hospital_id ? 'selected' : '' }}>
-                                    {{ $hospital->name }}
+                                    {{ $hospital->name }} - {{ $hospital->province ?? 'Unknown Province' }}
                                 </option>
                             @endforeach
                         </select>
@@ -521,6 +559,33 @@
 
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Update Appointment Details</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Status Update Section -->
+            <div class="status-section">
+                <h3 class="section-title">Update Status</h3>
+
+                <form method="POST" action="{{ route('appointment.update', $appointment->appointment_id) }}" class="section-form">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="update_type" value="status">
+
+                    <div class="form-group">
+                        <label for="status">Appointment Status</label>
+                        <select id="status" name="status" required>
+                            <option value="">Select Status</option>
+                            <option value="upcoming" {{ old('status', $appointment->status) == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                            <option value="completed" {{ old('status', $appointment->status) == 'completed' ? 'selected' : '' }}>Completed</option>
+                        </select>
+                        @error('status')
+                        <div class="error">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update Status</button>
                     </div>
                 </form>
             </div>

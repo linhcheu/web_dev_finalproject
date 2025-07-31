@@ -69,10 +69,11 @@
             width: 100%;
             overflow-x: auto;
             box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
         }
         table {
             width: 100%;
-            min-width: 400px;
+            min-width: 900px;
             border-collapse: collapse;
         }
         th, td {
@@ -80,10 +81,14 @@
             text-align: left;
             font-size: 14px;
             word-break: break-word;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         th {
             background-color: #f4f6fa;
             font-weight: 600;
+            white-space: nowrap;
         }
         .action-buttons {
             display: flex;
@@ -105,6 +110,7 @@
             transition: all 0.3s ease;
             min-width: 32px;
             height: 32px;
+            white-space: nowrap;
         }
         .action-btn-edit {
             background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
@@ -217,63 +223,314 @@
             cursor: pointer;
             font-weight: 600;
         }
-        /* Responsive styles */
-        @media (max-width: 900px) {
-            .main {
-                padding: 1rem !important;
+        /* Filter Styles */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0; /* Allow flex items to shrink */
+        }
+        
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+            width: 100%;
+            min-width: 0; /* Allow input to shrink */
+            box-sizing: border-box;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        
+        .btn-filter {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+        
+        .btn-filter-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+        
+        .btn-filter-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-1px);
+        }
+        
+        .btn-filter-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+        
+        .btn-filter-secondary:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            transform: translateY(-1px);
+        }
+        
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        
+        .filter-tag {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 200px;
+            overflow: hidden;
+        }
+        
+        .filter-tag span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .filter-tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            margin-left: 4px;
+            flex-shrink: 0;
+        }
+        
+        /* Table responsive improvements */
+        .overflow-x-auto {
+            width: 100%;
+            overflow-x: auto;
+            box-sizing: border-box;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 14px;
+            word-break: break-word;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        th {
+            background-color: #f4f6fa;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            min-width: 32px;
+            height: 32px;
+            white-space: nowrap;
+        }
+        
+        /* Status badge styles */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: capitalize;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        
+        .status-scheduled {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+        }
+        
+        .status-completed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        @media (max-width: 1024px) {
+            .filter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
-            .stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 1rem !important;
+            
+            th, td {
+                padding: 10px 12px;
+                font-size: 13px;
             }
         }
-        @media (max-width: 640px) {
-            .main {
-                padding: 0.5rem !important;
+        
+        @media (max-width: 768px) {
+            .filter-section {
+                padding: 15px;
             }
-            .stats-grid {
-                grid-template-columns: 1fr !important;
-                gap: 0.5rem !important;
+            
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
-            .stat-card {
-                width: 100% !important;
-                margin-bottom: 0.5rem !important;
+            
+            .filter-actions {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
+                gap: 8px;
             }
-            .activity-section {
-                padding: 0.5rem !important;
+            
+            .btn-filter {
+                justify-content: center;
+                padding: 12px 16px;
             }
-            table, th, td {
-                font-size: 12px !important;
-                padding: 6px 8px !important;
+            
+            .active-filters {
+                padding: 8px;
+                gap: 6px;
             }
+            
+            .filter-tag {
+                font-size: 11px;
+                padding: 3px 10px;
+                max-width: 150px;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            
+            table {
+                min-width: 700px;
+            }
+            
             .action-buttons {
                 flex-direction: column;
-                gap: 0.5rem;
-            }
-            .modal-content {
-                padding: 15px !important;
-                width: 98% !important;
+                gap: 4px;
+                align-items: stretch;
             }
         }
+        
         @media (max-width: 480px) {
-            .main {
-                padding: 0.25rem !important;
+            .filter-section {
+                padding: 12px;
+                margin-bottom: 15px;
             }
-            .stat-card {
-                padding: 10px !important;
+            
+            .filter-grid {
+                gap: 10px;
             }
-            .activity-section {
-                padding: 0.25rem !important;
+            
+            .filter-group input,
+            .filter-group select {
+                padding: 8px 10px;
+                font-size: 13px;
             }
+            
+            .btn-filter {
+                padding: 10px 14px;
+                font-size: 13px;
+            }
+            
+            .active-filters {
+                padding: 6px;
+                gap: 4px;
+            }
+            
+            .filter-tag {
+                font-size: 10px;
+                padding: 2px 8px;
+                max-width: 120px;
+            }
+            
             th, td {
-                font-size: 10px !important;
-                padding: 4px 4px !important;
+                padding: 6px 4px;
+                font-size: 11px;
             }
-            .modal-content {
-                padding: 8px !important;
-                width: 100% !important;
+            
+            table {
+                min-width: 600px;
             }
         }
     </style>
@@ -287,6 +544,132 @@
                 </div>
             </div>
         </div>
+        <div class="filter-section">
+            <h3 style="margin-bottom: 15px; color: #111827; font-size: 16px; font-weight: 600;">🔍 Filter Appointments</h3>
+            <form method="GET" action="{{ route('appointment.index') }}" id="filterForm">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label for="appointment_id">Appointment ID</label>
+                        <input type="text" id="appointment_id" name="appointment_id" value="{{ request('appointment_id') }}" placeholder="Enter appointment ID">
+                    </div>
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="all">All Status</option>
+                            <option value="upcoming" {{ request('status') == 'upcoming' ? 'selected' : '' }}>Upcoming</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="hospital_id">Hospital</label>
+                        <select id="hospital_id" name="hospital_id">
+                            <option value="all">All Hospitals</option>
+                            @foreach($hospitals as $hospital)
+                                <option value="{{ $hospital->hospital_id }}" {{ request('hospital_id') == $hospital->hospital_id ? 'selected' : '' }}>
+                                    {{ $hospital->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="user_id">Patient</label>
+                        <select id="user_id" name="user_id">
+                            <option value="all">All Patients</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->user_id }}" {{ request('user_id') == $user->user_id ? 'selected' : '' }}>
+                                    {{ $user->first_name }} {{ $user->last_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="appointment_date">Appointment Date</label>
+                        <input type="date" id="appointment_date" name="appointment_date" value="{{ request('appointment_date') }}">
+                    </div>
+                    <div class="filter-group">
+                        <label for="sort_by">Sort By</label>
+                        <select id="sort_by" name="sort_by">
+                            <option value="appointment_id" {{ $sortBy == 'appointment_id' ? 'selected' : '' }}>Appointment ID</option>
+                            <option value="appointment_date" {{ $sortBy == 'appointment_date' ? 'selected' : '' }}>Appointment Date</option>
+                            <option value="appointment_time" {{ $sortBy == 'appointment_time' ? 'selected' : '' }}>Appointment Time</option>
+                            <option value="status" {{ $sortBy == 'status' ? 'selected' : '' }}>Status</option>
+                            <option value="created_at" {{ $sortBy == 'created_at' ? 'selected' : '' }}>Created Date</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="sort_order">Sort Order</label>
+                        <select id="sort_order" name="sort_order">
+                            <option value="asc" {{ $sortOrder == 'asc' ? 'selected' : '' }}>Lowest to Highest</option>
+                            <option value="desc" {{ $sortOrder == 'desc' ? 'selected' : '' }}>Highest to Lowest</option>
+                        </select>
+                    </div>
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter btn-filter-primary">
+                            <i class="fas fa-search"></i>
+                            Apply Filters
+                        </button>
+                        <a href="{{ route('appointment.index') }}" class="btn-filter btn-filter-secondary">
+                            <i class="fas fa-times"></i>
+                            Clear All
+                        </a>
+                    </div>
+                </div>
+            </form>
+            
+            @if(request('appointment_id') || (request('status') && request('status') !== 'all') || (request('hospital_id') && request('hospital_id') !== 'all') || (request('user_id') && request('user_id') !== 'all') || request('appointment_date') || (request('sort_by') && request('sort_by') !== 'appointment_id') || (request('sort_order') && request('sort_order') !== 'asc'))
+                <div class="active-filters">
+                    @if(request('appointment_id'))
+                        <span class="filter-tag">
+                            <span>ID: {{ request('appointment_id') }}</span>
+                            <button onclick="removeFilter('appointment_id')">×</button>
+                        </span>
+                    @endif
+                    @if(request('status') && request('status') !== 'all')
+                        <span class="filter-tag">
+                            <span>Status: {{ ucfirst(request('status')) }}</span>
+                            <button onclick="removeFilter('status')">×</button>
+                        </span>
+                    @endif
+                    @if(request('hospital_id') && request('hospital_id') !== 'all')
+                        @php
+                            $selectedHospital = $hospitals->firstWhere('hospital_id', request('hospital_id'));
+                        @endphp
+                        <span class="filter-tag">
+                            <span>Hospital: {{ $selectedHospital ? $selectedHospital->name : 'Unknown' }}</span>
+                            <button onclick="removeFilter('hospital_id')">×</button>
+                        </span>
+                    @endif
+                    @if(request('user_id') && request('user_id') !== 'all')
+                        @php
+                            $selectedUser = $users->firstWhere('user_id', request('user_id'));
+                        @endphp
+                        <span class="filter-tag">
+                            <span>Patient: {{ $selectedUser ? $selectedUser->first_name . ' ' . $selectedUser->last_name : 'Unknown' }}</span>
+                            <button onclick="removeFilter('user_id')">×</button>
+                        </span>
+                    @endif
+                    @if(request('appointment_date'))
+                        <span class="filter-tag">
+                            <span>Date: {{ request('appointment_date') }}</span>
+                            <button onclick="removeFilter('appointment_date')">×</button>
+                        </span>
+                    @endif
+                    @if(request('sort_by') && request('sort_by') !== 'appointment_id')
+                        <span class="filter-tag">
+                            <span>Sort: {{ ucfirst(str_replace('_', ' ', request('sort_by'))) }}</span>
+                            <button onclick="removeFilter('sort_by')">×</button>
+                        </span>
+                    @endif
+                    @if(request('sort_order') && request('sort_order') !== 'asc')
+                        <span class="filter-tag">
+                            <span>Order: {{ request('sort_order') == 'asc' ? 'Lowest to Highest' : 'Highest to Lowest' }}</span>
+                            <button onclick="removeFilter('sort_order')">×</button>
+                        </span>
+                    @endif
+                </div>
+            @endif
+        </div>
+        
         <div class="activity-section mt-4">
             <h2>Appointment List</h2>
             <div class="overflow-x-auto">
@@ -299,6 +682,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Hospital</th>
+                        <th>Status</th>
                         <th>Symptoms</th>
                         <th>Action</th>
                     </tr>
@@ -308,10 +692,19 @@
                         <tr>
                             <td>{{ $appointment->appointment_id }}</td>
                             <td><strong>{{ $appointment->user->first_name }} {{ $appointment->user->last_name }}</strong></td>
-                            <td>{{ $appointment->user->phone ?? 'N/A' }}</td>
+                            <td>{{ $appointment->patient_phone ?? 'N/A' }}</td>
                             <td>{{ $appointment->appointment_date ? $appointment->appointment_date->format('m/d/Y') : 'N/A' }}</td>
                             <td>{{ $appointment->appointment_time ? \Carbon\Carbon::parse($appointment->appointment_time)->format('h:i A') : 'N/A' }}</td>
-                            <td>{{ $appointment->hospital->name ?? 'N/A' }}</td>
+                            <td>{{ $appointment->hospital->name ?? 'N/A' }}<br><small>{{ $appointment->hospital->province ?? 'N/A' }}</small></td>
+                            <td>
+                                <span class="px-2 py-1 text-xs rounded-full 
+                                    @if($appointment->status == 'upcoming') bg-blue-100 text-blue-800
+                                    @elseif($appointment->status == 'completed') bg-green-100 text-green-800
+                                    @else bg-gray-100 text-gray-800
+                                    @endif">
+                                    {{ ucfirst($appointment->status) }}
+                                </span>
+                            </td>
                             <td>{{ $appointment->symptom ?? 'N/A' }}</td>
                             <td>
                                 <div class="action-buttons">
@@ -330,7 +723,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-gray-500">No appointments found</td>
+                            <td colspan="9" class="text-center py-4 text-gray-500">No appointments found</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -398,6 +791,12 @@
                     button.classList.remove('loading');
                 });
             }
+        }
+        
+        function removeFilter(filterName) {
+            const url = new URL(window.location);
+            url.searchParams.delete(filterName);
+            window.location.href = url.toString();
         }
     </script>
 @endsection

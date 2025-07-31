@@ -11,18 +11,177 @@ use Illuminate\Support\Facades\Storage;
 
 class HospitalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = Hospital::query();
+        
+        // Filter by ID
+        if ($request->filled('hospital_id')) {
+            $query->where('hospital_id', 'LIKE', '%' . $request->hospital_id . '%');
+        }
+        
+        // Filter by name
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%' . $request->name . '%');
+        }
+        
+        // Filter by province
+        if ($request->filled('province') && $request->province !== 'all') {
+            $query->where('province', $request->province);
+        }
+        
+        // Filter by subscription status
+        if ($request->filled('subscription_status') && $request->subscription_status !== 'all') {
+            if ($request->subscription_status === 'has_subscription') {
+                $query->whereHas('subscription');
+            } else {
+                $query->whereDoesntHave('subscription');
+            }
+        }
+        
+        // Sorting
+        $sortBy = $request->get('sort_by', 'hospital_id');
+        $sortOrder = $request->get('sort_order', 'asc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['hospital_id', 'name', 'province', 'created_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'hospital_id';
+        }
+        
+        // Validate sort order
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
         $totalHospitals = Hospital::count();
-        $hospitals = Hospital::with('subscription')->latest()->paginate(10);
+        $hospitals = $query->with('subscription')->paginate(10)->withQueryString();
+        
+        // Get unique provinces for filter dropdown
+        $provinces = Hospital::distinct()->pluck('province')->filter()->values();
 
-        return view('hospital', compact('totalHospitals', 'hospitals'));
+        // Check if request expects JSON (API call)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'hospitals' => $hospitals->items(),
+                    'pagination' => [
+                        'current_page' => $hospitals->currentPage(),
+                        'last_page' => $hospitals->lastPage(),
+                        'per_page' => $hospitals->perPage(),
+                        'total' => $hospitals->total()
+                    ],
+                    'filters' => [
+                        'provinces' => $provinces
+                    ],
+                    'sort' => [
+                        'sort_by' => $sortBy,
+                        'sort_order' => $sortOrder
+                    ],
+                    'total_hospitals' => $totalHospitals
+                ]
+            ]);
+        }
+        
+        return view('hospital', compact('totalHospitals', 'hospitals', 'provinces', 'sortBy', 'sortOrder'));
     }
 
-    public function edit($id)
+    public function show(Request $request, $id)
+    {
+        $hospital = Hospital::with(['subscription', 'owner'])->findOrFail($id);
+
+        // Check if request expects JSON (API call)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'hospital' => [
+                        'id' => $hospital->hospital_id,
+                        'name' => $hospital->name,
+                        'province' => $hospital->province,
+                        'location' => $hospital->location,
+                        'contact_info' => $hospital->contact_info,
+                        'information' => $hospital->information,
+                        'profile_picture' => $hospital->profile_picture,
+                        'status' => $hospital->status,
+                        'created_at' => $hospital->created_at,
+                        'updated_at' => $hospital->updated_at,
+                        'owner' => $hospital->owner ? [
+                            'id' => $hospital->owner->user_id,
+                            'name' => $hospital->owner->first_name . ' ' . $hospital->owner->last_name,
+                            'email' => $hospital->owner->email
+                        ] : null,
+                        'subscription' => $hospital->subscription ? [
+                            'id' => $hospital->subscription->subscription_id,
+                            'plan_type' => $hospital->subscription->plan_type,
+                            'status' => $hospital->subscription->status,
+                            'start_date' => $hospital->subscription->start_date,
+                            'end_date' => $hospital->subscription->end_date
+                        ] : null
+                    ]
+                ]
+            ]);
+        }
+
+        return view('hospital_show', compact('hospital'));
+    }
+
+    public function edit(Request $request, $id)
     {
         $hospital = Hospital::with('subscription', 'owner')->findOrFail($id);
-        return view('hospital_edit', compact('hospital'));
+        
+        // Get unique provinces for dropdown
+        $provinces = Hospital::distinct()->pluck('province')->filter()->values();
+
+        // Check if request expects JSON (API call)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'hospital' => $hospital,
+                    'provinces' => $provinces,
+                    'form_fields' => [
+                        'name' => [
+                            'type' => 'text',
+                            'required' => true,
+                            'label' => 'Hospital Name'
+                        ],
+                        'province' => [
+                            'type' => 'select',
+                            'required' => true,
+                            'label' => 'Province',
+                            'options' => $provinces
+                        ],
+                        'location' => [
+                            'type' => 'textarea',
+                            'required' => true,
+                            'label' => 'Location'
+                        ],
+                        'contact_info' => [
+                            'type' => 'textarea',
+                            'required' => true,
+                            'label' => 'Contact Information'
+                        ],
+                        'information' => [
+                            'type' => 'textarea',
+                            'required' => false,
+                            'label' => 'Additional Information'
+                        ],
+                        'status' => [
+                            'type' => 'select',
+                            'required' => true,
+                            'label' => 'Status',
+                            'options' => ['pending' => 'Pending', 'active' => 'Active', 'rejected' => 'Rejected']
+                        ]
+                    ]
+                ]
+            ]);
+        }
+        
+        return view('hospital_edit', compact('hospital', 'provinces'));
     }
 
     public function update(Request $request, $id)
@@ -39,6 +198,8 @@ class HospitalController extends Controller
                 return $this->updateAdministrator($request, $hospital);
             case 'profile_picture':
                 return $this->updateProfilePicture($request, $hospital);
+            case 'hospital_profile_picture':
+                return $this->updateHospitalProfilePicture($request, $hospital);
             case 'basic_info':
                 return $this->updateBasicInfo($request, $hospital);
             case 'contact_info':
@@ -53,16 +214,14 @@ class HospitalController extends Controller
         $user = $hospital->owner;
 
         $validated = $request->validate([
-            // Admin fields
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users_table,email,' . ($user ? $user->user_id : 'NULL') . ',user_id',
-            'password' => 'nullable|string|min:6|confirmed',
+          
             // Hospital fields
             'name' => 'required|string|max:255',
+            'province' => 'required|string|max:100',
             'location' => 'required|string|max:500',
             'contact_info' => 'required|string|max:500',
             'information' => 'nullable|string|max:1000',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Update user (admin/owner)
@@ -79,9 +238,11 @@ class HospitalController extends Controller
         // Update hospital
         $hospital->update([
             'name' => $request->name,
+            'province' => $request->province,
             'location' => $request->location,
             'contact_info' => $request->contact_info,
             'information' => $request->information,
+            'profile_picture' => $request->profile_picture,
         ]);
 
         return redirect()->route('hospital.edit', $hospital->hospital_id)->with('success', 'Hospital and administrator updated successfully!');
@@ -137,7 +298,26 @@ class HospitalController extends Controller
         }
 
         // Store new profile picture
-        $profilePicturePath = $request->file('profile_picture')->store('hospital-pictures', 'public');
+        $profilePicturePath = $request->file('profile_picture')->store('hospital-profile-pictures', 'public');
+        
+        $hospital->update(['profile_picture' => $profilePicturePath]);
+
+        return redirect()->route('hospital.edit', $hospital->hospital_id)->with('success', 'Hospital profile picture updated successfully!');
+    }
+    
+    private function updateHospitalProfilePicture(Request $request, $hospital)
+    {
+        $request->validate([
+            'hospital_profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Delete old profile picture if exists
+        if ($hospital->profile_picture) {
+            Storage::disk('public')->delete($hospital->profile_picture);
+        }
+
+        // Store new profile picture
+        $profilePicturePath = $request->file('hospital_profile_picture')->store('hospital-profile-pictures', 'public');
         
         $hospital->update(['profile_picture' => $profilePicturePath]);
 
@@ -148,6 +328,7 @@ class HospitalController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'province' => 'required|string|max:100',
             'information' => 'nullable|string|max:1000',
             'location' => 'required|string|max:500',
             'hospital_profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -155,6 +336,7 @@ class HospitalController extends Controller
 
         $updateData = [
             'name' => $request->name,
+            'province' => $request->province,
             'information' => $request->information,
             'location' => $request->location,
         ];
@@ -197,4 +379,69 @@ class HospitalController extends Controller
             return response()->json(['success' => false, 'message' => 'Error deleting hospital: ' . $e->getMessage()]);
         }
     }
-} 
+
+    public function create()
+    {
+        // Get provinces for dropdown - this is a fallback in case the view needs it
+        $provinces = [
+            'Phnom Penh', 'Banteay Meanchey', 'Battambang', 'Kampong Cham',
+            'Kampong Chhnang', 'Kampong Speu', 'Kampong Thom', 'Kampot',
+            'Kandal', 'Kep', 'Koh Kong', 'Kratie', 'Mondulkiri',
+            'Oddar Meanchey', 'Pailin', 'Preah Vihear', 'Prey Veng',
+            'Pursat', 'Ratanakiri', 'Siem Reap', 'Sihanoukville',
+            'Stung Treng', 'Svay Rieng', 'Takeo', 'Tbong Khmum'
+        ];
+        
+        // Get available users who can be hospital admins
+        $availableAdmins = User::where('role', 'hospital_admin')
+            ->whereDoesntHave('hospitals')
+            ->get();
+        
+        return view('hospital_create', compact('provinces', 'availableAdmins'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'province' => 'required|string|max:100',
+            'location' => 'required|string',
+            'contact_info' => 'required|string',
+            'information' => 'nullable|string',
+            'owner_id' => 'nullable|exists:users_table,user_id',
+            'status' => 'required|in:pending,active,rejected',
+            'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $hospitalData = [
+            'name' => $request->name,
+            'province' => $request->province,
+            'location' => $request->location,
+            'contact_info' => $request->contact_info,
+            'information' => $request->information,
+            'owner_id' => $request->owner_id,
+            'status' => $request->status,
+        ];
+
+        // Handle profile picture upload
+        if ($request->hasFile('profile_picture')) {
+            $profilePicturePath = $request->file('profile_picture')->store('hospital-profile-pictures', 'public');
+            $hospitalData['profile_picture'] = $profilePicturePath;
+        }
+
+        $hospital = Hospital::create($hospitalData);
+
+        // Optionally create a subscription
+        if ($request->has('create_subscription') && $request->create_subscription) {
+            $hospital->subscriptions()->create([
+                'plan_type' => $request->plan_type ?? 'basic',
+                'status' => 'active',
+                'start_date' => now(),
+                'end_date' => now()->addYear(),
+            ]);
+        }
+
+        return redirect()->route('hospital.index')
+            ->with('success', 'Hospital created successfully!');
+    }
+}

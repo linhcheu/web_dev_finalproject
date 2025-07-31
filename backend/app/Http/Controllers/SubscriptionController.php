@@ -8,12 +8,60 @@ use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $totalSubscriptions = Subscription::count();
-        $subscriptions = Subscription::with('user')->latest()->paginate(10);
+        $subscriptions = Subscription::with('hospital')->latest()->paginate(10);
+
+        // Check if request expects JSON (API call)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'subscriptions' => $subscriptions->items(),
+                    'pagination' => [
+                        'current_page' => $subscriptions->currentPage(),
+                        'last_page' => $subscriptions->lastPage(),
+                        'per_page' => $subscriptions->perPage(),
+                        'total' => $subscriptions->total()
+                    ],
+                    'total_subscriptions' => $totalSubscriptions
+                ]
+            ]);
+        }
 
         return view('subcription', compact('totalSubscriptions', 'subscriptions'));
+    }
+
+    public function show(Request $request, $id)
+    {
+        $subscription = Subscription::with('hospital')->findOrFail($id);
+
+        // Check if request expects JSON (API call)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'subscription' => [
+                        'id' => $subscription->subscription_id,
+                        'plan_type' => $subscription->plan_type,
+                        'price' => $subscription->price,
+                        'start_date' => $subscription->start_date,
+                        'end_date' => $subscription->end_date,
+                        'status' => $subscription->status,
+                        'auto_renew' => $subscription->auto_renew,
+                        'created_at' => $subscription->created_at,
+                        'hospital' => $subscription->hospital ? [
+                            'id' => $subscription->hospital->hospital_id,
+                            'name' => $subscription->hospital->name,
+                            'location' => $subscription->hospital->location
+                        ] : null
+                    ]
+                ]
+            ]);
+        }
+
+        return view('subscription_show', compact('subscription'));
     }
 
     public function edit($id)

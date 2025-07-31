@@ -215,7 +215,7 @@
                         <div class="activity-icon hospitals">🏥</div>
                         <div class="activity-content">
                             <div class="activity-title">New hospital added</div>
-                            <div class="activity-description">{{ $hospital->name }} joined the network</div>
+                            <div class="activity-description">{{ $hospital->name }} in {{ $hospital->province ?? 'Unknown Province' }} joined the network</div>
                         </div>
                         <div class="activity-time">{{ $hospital->created_at->diffForHumans() }}</div>
                     </div>
