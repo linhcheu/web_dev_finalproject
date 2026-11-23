@@ -1,7 +1,7 @@
 # CareConnect
 
 Hospital appointment platform: patients find hospitals and book appointments, hospitals manage
-their bookings, and platform admins manage everything. Three Laravel 12 apps:
+their bookings, and platform admins manage everything. Three Laravel 13 apps:
 
 | Folder | App | Default local URL | Database |
 |---|---|---|---|
@@ -17,7 +17,7 @@ browser ──▶ backend  ──┘
 
 ## Run it locally
 
-Requirements: PHP 8.2+ (8.4 recommended), Composer 2, MySQL 8.
+Requirements: PHP 8.3+ (8.4 recommended), Composer 2, MySQL 8.
 
 ```bash
 # 1. API (creates the tables and demo data)

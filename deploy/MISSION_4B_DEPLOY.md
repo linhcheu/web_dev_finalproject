@@ -6,7 +6,7 @@ Every step was tested on Ubuntu 24.04 with Apache and MySQL 8.0 before it was wr
 
 ## What you are deploying
 
-CareConnect is three Laravel 12 apps on **one** Droplet:
+CareConnect is three Laravel 13 apps (PHP 8.4) on **one** Droplet:
 
 | App | Folder | URL | Talks to |
 |---|---|---|---|
