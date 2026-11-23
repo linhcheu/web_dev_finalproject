@@ -55,4 +55,4 @@ cd backend && php artisan test
 
 ## Deploy to a DigitalOcean Droplet (Cloud Computing Mission 4b)
 
-Follow **[deploy/MISSION_4B_DEPLOY.md](deploy/MISSION_4B_DEPLOY.md)**. The `deploy/` folder also holds the Apache virtual hosts, the production `.env` templates and a final-check script.
+Follow **[deploy/MISSION_4B_DEPLOY.md](deploy/MISSION_4B_DEPLOY.md)**. For a quick try on a server's IPv4 first: `DB_USERNAME=... DB_PASSWORD=... bash deploy/scripts/test-server.sh` (website on `:8000`, admin panel on `:8080`). The `deploy/` folder also holds the Apache virtual hosts, the production `.env` templates and a final-check script.

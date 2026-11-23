@@ -247,6 +247,25 @@ cd /var/www && unzip careconnect.zip && mv web_dev_finalproject careconnect
 
 ---
 
+## 6½. Optional: quick test on your IPv4 before the Apache setup
+
+Once sections 4–6 are done (PHP, Composer, MySQL with your database and user, project cloned), one command starts all three apps:
+
+```bash
+cd /var/www/careconnect
+DB_USERNAME=YOUR_MYSQL_USER DB_PASSWORD='YOUR_MYSQL_PASSWORD' ADMIN_PASSWORD='YOUR_ADMIN_PASSWORD' \
+  bash deploy/scripts/test-server.sh
+```
+
+Then open:
+
+* Website: `http://YOUR_SERVER_IP:8000`
+* Admin panel: `http://YOUR_SERVER_IP:8080`
+
+The script opens ports 8000 and 8080 in ufw. **Ctrl+C** stops it. It uses Laravel's built-in test server, so for the real mission continue with sections 7–11 (Apache on ports 80 and 8080). Afterwards close the test ports with `ufw delete allow 8000/tcp`. Port 8080 stays open, because the admin panel uses it.
+
+---
+
 ## 7. Mission 4b Step 3: dependencies and .env (three apps)
 
 Explain this in the video: `vendor/` is **not** uploaded because Composer rebuilds it from `composer.lock`. `--no-dev` skips test tools that a server doesn't need.
