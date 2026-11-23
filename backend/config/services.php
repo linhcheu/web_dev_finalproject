@@ -2,6 +2,14 @@
 
 return [
 
+    // The CareConnect API (api/ app). MEDIA_URL serves uploaded pictures.
+    'api' => [
+        'url' => env('API_URL', 'http://127.0.0.1:8081'),
+        'media_url' => env('API_MEDIA_URL', rtrim(env('API_URL', 'http://127.0.0.1:8081'), '/').'/storage'),
+        'timeout' => (int) env('API_TIMEOUT', 15),
+    ],
+
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

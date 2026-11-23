@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('content')
 <style>
@@ -515,6 +517,15 @@
                     <textarea id="information" name="information">{{ old('information', $hospital->information) }}</textarea>
                     @error('information')<div class="error">{{ $message }}</div>@enderror
                 </div>
+                <div class="form-group">
+                    <label for="status">Approval status</label>
+                    <select id="status" name="status" required>
+                        @foreach(['pending' => 'Pending (hidden from patients)', 'active' => 'Active (visible, can take bookings)', 'rejected' => 'Rejected'] as $value => $label)
+                            <option value="{{ $value }}" @selected(old('status', $hospital->status) === $value)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('status')<div class="error">{{ $message }}</div>@enderror
+                </div>
                 <button type="submit" class="btn btn-primary">Update Hospital Information</button>
             </form>
         </div>
@@ -531,9 +542,9 @@
                     <div class="profile-picture-container">
                         <div style="position: relative; display: inline-block;">
                             @if($hospital->profile_picture)
-                                <img src="{{ asset('storage/' . $hospital->profile_picture) }}?v={{ time() }}" alt="Hospital Profile Picture" class="profile-picture" id="hospital-profile-preview">
+                                <img src="{{ media_url($hospital->profile_picture) }}?v={{ time() }}" alt="Hospital Profile Picture" class="profile-picture" id="hospital-profile-preview">
                                 <!-- Debug: {{ $hospital->profile_picture }} -->
-                                <!-- Debug URL: {{ asset('storage/' . $hospital->profile_picture) }} -->
+                                <!-- Debug URL: {{ media_url($hospital->profile_picture) }} -->
                             @else
                                 <img src="{{ asset('images/default-profile.jpg') }}?v={{ time() }}" alt="Default Profile" class="profile-picture" id="hospital-profile-preview">
                                 <!-- Debug: No profile picture found -->
@@ -891,7 +902,7 @@ function updateImagePreview(imageElement, file) {
 function refreshImageAfterUpload(imageElement, imagePath) {
     if (imagePath) {
         const timestamp = new Date().getTime();
-        imageElement.src = `{{ asset('storage/') }}/${imagePath}?v=${timestamp}`;
+        imageElement.src = `{{ rtrim(config('services.api.media_url'), '/') }}/${imagePath}?v=${timestamp}`;
         imageElement.style.display = 'block';
     }
 }
@@ -905,26 +916,6 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.reload();
         }, 1000);
     }
-    
-    // Check if we have updated profile picture in session
-    @if(session('updated_hospital_profile_picture'))
-        const updatedImagePath = '{{ session('updated_hospital_profile_picture') }}';
-        const imageElement = document.getElementById('hospital-profile-preview');
-        if (imageElement && updatedImagePath) {
-            const timestamp = new Date().getTime();
-            imageElement.src = `{{ asset('storage/') }}/${updatedImagePath}?v=${timestamp}`;
-            imageElement.style.display = 'block';
-        }
-        // Clear the session data
-        fetch('{{ route('hospital.edit', $hospital->hospital_id) }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ clear_session: 'hospital_profile_picture' })
-        });
-    @endif
 });
 </script>
 @endsection 

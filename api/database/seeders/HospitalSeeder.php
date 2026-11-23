@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\frontendModels\User;
-use App\Models\frontendModels\Hospital;
+use App\Models\User;
+use App\Models\Hospital;
 use Carbon\Carbon;
 
 class HospitalSeeder extends Seeder
@@ -57,20 +57,8 @@ class HospitalSeeder extends Seeder
         $hospitalAdmins = User::where('role', 'hospital_admin')->get();
 
         foreach ($hospitalAdmins as $admin) {
-            // Extract hospital name from admin first name and last name
-            $hospitalName = '';
-            
-            if ($admin->last_name == 'Hospital') {
-                $hospitalName = $admin->first_name . ' Hospital';
-            } elseif ($admin->last_name == 'Clinic') {
-                $hospitalName = $admin->first_name . ' Clinic';
-            } elseif ($admin->last_name == 'Medical') {
-                $hospitalName = $admin->first_name . ' Medical Center';
-            } elseif ($admin->last_name == 'Pediatric') {
-                $hospitalName = $admin->first_name . ' Pediatric Hospital';
-            } else {
-                $hospitalName = $admin->first_name . ' ' . $admin->last_name;
-            }
+            // Extract hospital name from admin first_name (which now contains the full hospital name)
+            $hospitalName = str_replace(' Admin', '', $admin->first_name);
             
             // Check if hospital already exists for this admin
             $existingHospital = Hospital::where('owner_id', $admin->user_id)->first();
@@ -81,7 +69,7 @@ class HospitalSeeder extends Seeder
                     'name' => $hospitalName,
                     'province' => $provinces[array_rand($provinces)],
                     'location' => $locations[array_rand($locations)],
-                    'contact_info' => str_replace('{hospital}', strtolower($admin->first_name), $contactInfos[array_rand($contactInfos)]),
+                    'contact_info' => str_replace('{hospital}', strtolower(explode(' ', $hospitalName)[0]), $contactInfos[array_rand($contactInfos)]),
                     'information' => $hospitalInfos[array_rand($hospitalInfos)],
                     'owner_id' => $admin->user_id,
                     'status' => 'active',
@@ -105,3 +93,5 @@ class HospitalSeeder extends Seeder
         $this->command->info('Hospitals created successfully with active subscriptions!');
     }
 }
+
+   

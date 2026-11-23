@@ -48,7 +48,7 @@
 </section>
 
 <!-- Why Trust Us Section -->
-<section class="section bg-light"style="background:var(--primary-color); color:black; backdrop-filter:blur(8px);padding:3rem 0; data-aos="fade-up" data-aos-delay="200" data-aos-duration="900" >
+<section class="section bg-light"style="background:var(--primary-color); color:black; backdrop-filter:blur(8px);padding:3rem 0;" data-aos="fade-up" data-aos-delay="200" data-aos-duration="900">
     <div class="container" style="background:white;backdrop-filter:blur(8px);padding:2rem;border-radius:0.75rem;box-shadow:0 4px 24px 0 rgba(0,0,0,0.08),0 1.5px 4px 0 rgba(0,188,212,0.07);margin-bottom:2rem;border:1.5px solid #e0e7ef;position:relative;overflow:hidden;">
         <div class="section-header text-center" style="background:white;backdrop-filter:blur(8px);padding:2rem;border-radius:0.75rem;box-shadow:0 4px 24px 0 rgba(0,0,0,0.08),0 1.5px 4px 0 rgba(0,188,212,0.07);margin-bottom:2rem;border:1.5px solid #e0e7ef;position:relative;overflow:hidden;">
             <h2>Why You Should Trust Us</h2>
@@ -125,7 +125,7 @@
 </section>
 
 <!-- Popular Hospitals Section -->
-<section class="section bg-light" style="background:var(--light-color); color:black; backdrop-filter:blur(8px);padding:3rem 0; data-aos="fade-up" data-aos-delay="200" data-aos-duration="900"" >
+<section class="section bg-light" style="background:var(--light-color); color:black; backdrop-filter:blur(8px);padding:3rem 0;" data-aos="fade-up" data-aos-delay="200" data-aos-duration="900">
     <div class="container" style="background:white;backdrop-filter:blur(8px);padding:2rem;border-radius:0.75rem;box-shadow:0 4px 24px 0 rgba(0,0,0,0.08),0 1.5px 4px 0 rgba(0,188,212,0.07);margin-bottom:2rem;border:1.5px solid #e0e7ef;position:relative;overflow:hidden;">
         <div class="section-header text-center" style="background:white;backdrop-filter:blur(8px);padding:2rem;border-radius:0.75rem;box-shadow:0 4px 24px 0 rgba(0,0,0,0.08),0 1.5px 4px 0 rgba(0,188,212,0.07);margin-bottom:2rem;border:1.5px solid #e0e7ef;position:relative;overflow:hidden;">
             <h2>Popular Hospitals</h2>
@@ -137,7 +137,7 @@
                     <div class="hospital-card">
                         <div class="hospital-image">
                             @if($hospital->profile_picture)
-                                <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="{{ $hospital->name }}">
+                                <img src="{{ media_url($hospital->profile_picture) }}" alt="{{ $hospital->name }}">
                             @else
                                 <i class="fas fa-hospital"></i>
                             @endif
@@ -179,7 +179,7 @@
                     @foreach($popularHospitals as $hospital)
                         <div class="partner-logo-marquee" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:80px;height:80px;background:white;border-radius:1rem;box-shadow:0 4px 15px rgba(0,0,0,0.1);margin:0 1rem;transition:all 0.3s ease;">
                             @if($hospital->profile_picture)
-                                <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="{{ $hospital->name }}" style="max-width: 50px; max-height: 50px; border-radius: 8px; object-fit: cover;">
+                                <img src="{{ media_url($hospital->profile_picture) }}" alt="{{ $hospital->name }}" style="max-width: 50px; max-height: 50px; border-radius: 8px; object-fit: cover;">
                             @else
                                 <i class="fas fa-hospital" style="font-size:2rem;color:var(--primary-color);"></i>
                             @endif
@@ -189,7 +189,7 @@
                     @foreach($popularHospitals as $hospital)
                         <div class="partner-logo-marquee" style="flex-shrink:0;display:flex;align-items:center;justify-content:center;width:80px;height:80px;background:white;border-radius:1rem;box-shadow:0 4px 15px rgba(0,0,0,0.1);margin:0 1rem;transition:all 0.3s ease;">
                             @if($hospital->profile_picture)
-                                <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="{{ $hospital->name }}" style="max-width: 50px; max-height: 50px; border-radius: 8px; object-fit: cover;">
+                                <img src="{{ media_url($hospital->profile_picture) }}" alt="{{ $hospital->name }}" style="max-width: 50px; max-height: 50px; border-radius: 8px; object-fit: cover;">
                             @else
                                 <i class="fas fa-hospital" style="font-size:2rem;color:var(--primary-color);"></i>
                             @endif
@@ -226,7 +226,7 @@
                         <div class="feedback-author">
                             <div class="author-avatar">
                                 @if($feedback->user->profile_picture)
-                                    <img src="{{ asset('storage/' . $feedback->user->profile_picture) }}" alt="User Avatar">
+                                    <img src="{{ media_url($feedback->user->profile_picture) }}" alt="User Avatar">
                                 @else
                                     <div class="avatar-initials">
                                         {{ strtoupper(substr($feedback->user->first_name, 0, 1)) }}{{ strtoupper(substr($feedback->user->last_name, 0, 1)) }}
@@ -277,11 +277,18 @@
 <!-- AOS Animate On Scroll Library -->
 <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <script>
-  AOS.init({
-    once: true,
-    duration: 900,
-    offset: 80,
-  });
+  // Scroll animations are optional: the page must still work if the CDN is unreachable.
+  if (window.AOS) {
+    AOS.init({
+      once: true,
+      duration: 900,
+      offset: 80,
+      disable: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    });
+  } else {
+    // Without the script, aos.css would keep these sections invisible.
+    document.querySelectorAll('[data-aos]').forEach(el => el.removeAttribute('data-aos'));
+  }
   // Back to Top Button
   const backToTopBtn = document.getElementById('backToTopBtn');
   let backToTopVisible = false;

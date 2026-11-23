@@ -47,7 +47,7 @@
             <!-- Filter by Date -->
             <form method="GET" action="" style="max-width:350px;margin-bottom:1.5rem;">
                 <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="date" name="date" value="{{ $appointment->appointment_date ?? '' }}" class="form-control" style="flex:1;padding:0.6rem 1rem;border-radius:0.5rem;border:1.5px solid #e5e7eb;">
+                    <input type="date" name="date" value="{{ request('date') }}" class="form-control" style="flex:1;padding:0.6rem 1rem;border-radius:0.5rem;border:1.5px solid #e5e7eb;">
                     <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.2rem;border-radius:0.5rem;font-size:1rem;"><i class="fas fa-search"></i> Filter</button>
                     @if(request('date'))
                     <a href="{{ route('appointments') }}" class="btn btn-outline" style="padding:0.6rem 1.2rem;border-radius:0.5rem;font-size:1rem;background:#fff;"><i class="fas fa-list"></i> Show All</a>

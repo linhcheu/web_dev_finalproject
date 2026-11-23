@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('content')
     <style>

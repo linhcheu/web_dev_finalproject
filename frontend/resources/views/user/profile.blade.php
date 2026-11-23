@@ -38,7 +38,7 @@
                     <div class="form-group" style="flex:1;min-width:140px;">
                         <label for="profile_picture" class="form-label" style="display:block;margin-bottom:0.4rem;font-weight:600;color:var(--dark-color);font-size:1rem;"><i class="fas fa-image"></i> Profile Picture</label>
                         @if(auth()->user()->profile_picture)
-                            <div style="margin-bottom:0.5rem;"><img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile Picture" style="max-width:80px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.07);"></div>
+                            <div style="margin-bottom:0.5rem;"><img src="{{ media_url(auth()->user()->profile_picture) }}" alt="Profile Picture" style="max-width:80px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.07);"></div>
                         @endif
                         <div class="upload-container" id="userProfileUploadContainer" style="border:2px solid #e5e7eb;border-radius:0.7rem;padding:1.5rem;background:#f9fafb;transition:all 0.3s ease;">
                             <div class="upload-header" style="text-align:center;margin-bottom:1rem;">

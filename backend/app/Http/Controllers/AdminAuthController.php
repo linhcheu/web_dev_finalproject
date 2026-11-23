@@ -2,119 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Admin;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\JsonResponse;
+use Illuminate\View\View;
 
 class AdminAuthController extends Controller
 {
-    /**
-     * Show login form or return form structure for API
-     */
-    public function showLoginForm(Request $request)
+    public function showLoginForm(): View
     {
-        // Check if request expects JSON (API call)
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'form_fields' => [
-                        'email' => [
-                            'type' => 'email',
-                            'required' => true,
-                            'label' => 'Admin Email'
-                        ],
-                        'password' => [
-                            'type' => 'password',
-                            'required' => true,
-                            'label' => 'Password'
-                        ]
-                    ],
-                    'validation_rules' => [
-                        'email' => 'required|email',
-                        'password' => 'required'
-                    ]
-                ]
-            ]);
-        }
-        
         return view('admin_login');
     }
 
-    /**
-     * Handle admin login
-     */
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
-        $request->validate([
+        $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|string',
         ]);
 
-        $admin = Admin::where('email', $request->email)->first();
+        $data = $this->api->post('admin/auth/login', $credentials)['data'];
+        Auth::guard('admin')->login($data['admin'], $data['token']);
 
-        if ($admin && Hash::check($request->password, $admin->password_hash)) {
-            // Check if request expects JSON (API call)
-            if ($request->expectsJson() || $request->is('api/*')) {
-                // For API: Create token and return JSON
-                $token = $admin->createToken('admin-token', ['admin'])->plainTextToken;
-                
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Admin login successful',
-                    'data' => [
-                        'admin' => [
-                            'id' => $admin->admin_id,
-                            'username' => $admin->username,
-                            'email' => $admin->email
-                        ],
-                        'token' => $token,
-                        'token_type' => 'Bearer'
-                    ]
-                ]);
-            }
-            
-            // For web: Traditional login
-            Auth::guard('admin')->login($admin);
-            return redirect('/dashboard')->with('success', 'Welcome, Admin!');
-        }
-
-        // Handle failed login
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials',
-                'errors' => ['email' => ['The provided credentials are incorrect.']]
-            ], 401);
-        }
-
-        return redirect()->route('admin.login.form')->with('error', 'Invalid admin credentials.');
+        return redirect()->intended(route('dashboard'))->with('success', 'Welcome, Admin!');
     }
 
-    /**
-     * Handle admin logout
-     */
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
-        // Check if request expects JSON (API call)
-        if ($request->expectsJson() || $request->is('api/*')) {
-            // For API: Revoke tokens
-            if ($request->user()) {
-                $request->user()->tokens()->delete();
-            }
-            
-            return response()->json([
-                'success' => true,
-                'message' => 'Logged out successfully'
-            ]);
-        }
-        
-        // For web: Traditional logout
+        rescue(fn () => $this->api->post('admin/auth/logout'), report: false);
+
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('admin.login.form')->with('success', 'Logged out successfully.');
     }
 }

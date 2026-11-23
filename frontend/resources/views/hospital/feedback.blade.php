@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
 
 @section('title', 'Feedback - Hospital Dashboard')
 
@@ -59,7 +60,7 @@
     </div>
     <!-- Smiley Reaction Ranking: Blue, with texture -->
     <div class="feedback-section section-blue section-texture" style="padding:1.5rem 1.5rem 2rem 1.5rem;border-radius:1.2rem;margin-bottom:2rem;color:black;display:flex;align-items:center;justify-content:center;flex-direction:column;">
-        <div style="display:flex;gap:2.5rem;justify-content:center;align-items:center;margin-bottom:1rem;">
+        <div style="display:flex;flex-wrap:wrap;gap:1.5rem 2.5rem;justify-content:center;align-items:center;margin-bottom:1rem;">
             <div style="text-align:center;">
                 <span style="font-size:2.5rem;display:block;">😡</span>
                 <div style="font-size:1rem;margin-top:0.3rem;">Very Dissatisfied</div>

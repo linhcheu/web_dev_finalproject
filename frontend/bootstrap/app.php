@@ -11,9 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+        // Logged-in users who open /login etc. go to their own start page.
+        $middleware->redirectUsersTo(fn () => auth()->user()?->isHospitalAdmin() ? route('hospital.dashboard') : route('home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

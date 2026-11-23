@@ -1,4 +1,6 @@
-@extends("layouts.app")
+@extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('content')
     <style>
@@ -675,7 +677,7 @@
                         <div class="image-upload-container" data-input-name="profile_picture">
                             <div class="profile-picture-container">
                                 <div style="position: relative; display: inline-block;">
-                                    <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/default-profile.jpg') }}?v={{ time() }}" 
+                                    <img src="{{ $user->profile_picture ? media_url($user->profile_picture) : asset('images/default-profile.jpg') }}?v={{ time() }}" 
                                          alt="Profile Picture" class="profile-picture" id="profile-preview">
                                     <div class="preview-status" id="profile-status">NEW</div>
                                 </div>

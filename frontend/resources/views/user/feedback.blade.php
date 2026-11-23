@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('title', 'Feedback - CareConnect')
 
@@ -132,7 +134,7 @@
 }
 @media (max-width: 900px) {
     .feedback-content {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
 }
 @media (max-width: 700px) {

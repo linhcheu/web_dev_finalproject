@@ -1,4 +1,5 @@
 @extends('layouts.app')
+@section('handles_errors', '1')
 
 @section('title', 'Book Appointment - CareConnect')
 

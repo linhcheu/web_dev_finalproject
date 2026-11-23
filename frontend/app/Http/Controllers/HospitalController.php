@@ -2,247 +2,161 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Hospital;
 use App\Models\Appointment;
-use App\Models\Subscription;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Hospital;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
+/**
+ * Public hospital pages + the hospital administrator's portal (/hospital/...).
+ */
 class HospitalController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Hospital::with('owner', 'subscriptions')->active()->withActiveSubscription();
+    public const PROVINCES = [
+        'Banteay Meanchey', 'Battambang', 'Kampong Cham', 'Kampong Chhnang', 'Kampong Speu', 'Kampong Thom',
+        'Kampot', 'Kandal', 'Kep', 'Koh Kong', 'Kratie', 'Mondulkiri', 'Oddar Meanchey', 'Pailin',
+        'Phnom Penh', 'Preah Sihanouk', 'Preah Vihear', 'Prey Veng', 'Pursat', 'Ratanakiri', 'Siem Reap',
+        'Stung Treng', 'Svay Rieng', 'Takeo', 'Tbong Khmum',
+    ];
 
-        if ($request->filled('province')) {
-            $query->where('province', $request->province);
-        }
+    // ---- Public -------------------------------------------------------------
 
-        $hospitals = $query->latest()->get();
+    public function index(Request $request): View
+    {
+        $request->validate(['province' => 'nullable|string|max:100']);
 
-        $provinces = [
-            'Banteay Meanchey', 'Battambang', 'Kampong Cham', 'Kampong Chhnang', 'Kampong Speu', 'Kampong Thom',
-            'Kampot', 'Kandal', 'Kep', 'Koh Kong', 'Kratie', 'Mondulkiri', 'Oddar Meanchey', 'Pailin',
-            'Preah Vihear', 'Pursat', 'Prey Veng', 'Ratanakiri', 'Siem Reap', 'Preah Sihanouk', 'Stung Treng',
-            'Svay Rieng', 'Takeo', 'Tbong Khmum', 'Phnom Penh'
-        ];
-
-        return view('hospitals.index', compact('hospitals', 'provinces'));
-    }
-    
-    public function show(Hospital $hospital)
-    {
-        $hospital->load('owner', 'subscriptions');
-        return view('hospitals.show', compact('hospital'));
-    }
-    
-    public function dashboard()
-    {
-        $hospital = auth()->user()->hospital;
-        
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        
-        $stats = [
-            'total_appointments' => $hospital->appointments()->count(),
-            'upcoming_appointments' => $hospital->appointments()->upcoming()->count(),
-            'today_appointments' => $hospital->appointments()->whereDate('appointment_date', today())->count(),
-            'total_feedback' => $hospital->owner->feedback()->count(),
-        ];
-        
-        $recent_appointments = $hospital->appointments()
-            ->with('user')
-            ->latest()
-            ->take(5)
-            ->get();
-            
-        $upcoming_appointments = $hospital->appointments()
-            ->with('user')
-            ->upcoming()
-            ->orderBy('appointment_date')
-            ->take(10)
-            ->get();
-            
-        return view('hospital.dashboard', compact('hospital', 'stats', 'recent_appointments', 'upcoming_appointments'));
-    }
-    
-    public function appointments(Request $request)
-    {
-        $hospital = auth()->user()->hospital;
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        $query = $hospital->appointments()->with('user')->latest();
-        
-        // Filter by phone number
-        if ($request->filled('phone')) {
-            $query->where('patient_phone', 'like', '%' . $request->phone . '%');
-        }
-        
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-        
-        $appointments = $query->paginate(20);
-        return view('hospital.appointments', compact('hospital', 'appointments'));
-    }
-    
-    public function updateAppointment(Request $request, Appointment $appointment)
-    {
-        $hospital = auth()->user()->hospital;
-        
-        if (!$hospital || $appointment->hospital_id !== $hospital->hospital_id) {
-            return back()->with('error', 'Unauthorized action.');
-        }
-        
-        $request->validate([
-            'status' => 'required|in:upcoming,completed'
+        return view('hospitals.index', [
+            'hospitals' => Hospital::collectionFromApi($this->api->get('hospitals', $request->only('province'))['data']),
+            'provinces' => self::PROVINCES,
         ]);
-        
-        $appointment->update([
-            'status' => $request->status
+    }
+
+    public function show(int $hospital): View
+    {
+        return view('hospitals.show', ['hospital' => Hospital::fromApi($this->api->get("hospitals/$hospital")['data'])]);
+    }
+
+    // ---- Hospital admin portal ---------------------------------------------
+
+    public function dashboard(): View
+    {
+        $data = $this->api->get('my-hospital/dashboard')['data'];
+
+        return view('hospital.dashboard', [
+            'hospital' => Hospital::fromApi($data['hospital']),
+            'stats' => $data['stats'],
+            'recent_appointments' => Appointment::collectionFromApi($data['recent_appointments']),
+            'upcoming_appointments' => Appointment::collectionFromApi($data['upcoming_appointments']),
         ]);
-        
+    }
+
+    public function appointments(Request $request): View
+    {
+        return view('hospital.appointments', [
+            'hospital' => $this->hospital(),
+            'appointments' => $this->api->paginate('my-hospital/appointments', Appointment::class, $request->only('phone', 'status', 'page')),
+        ]);
+    }
+
+    public function updateAppointment(Request $request, int $appointment): RedirectResponse
+    {
+        $data = $request->validate(['status' => 'required|in:upcoming,completed,no_show']);
+
+        $this->api->patch("my-hospital/appointments/$appointment", $data);
+
         return back()->with('success', 'Appointment updated successfully.');
     }
-    
-    public function profile()
+
+    public function profile(): View
     {
-        $hospital = auth()->user()->hospital;
-        
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        
-        return view('hospital.profile', compact('hospital'));
+        return view('hospital.profile', ['hospital' => $this->hospital(), 'provinces' => self::PROVINCES]);
     }
-    
-    public function updateProfile(Request $request)
+
+    /** The profile page has three forms, told apart by "update_type". */
+    public function updateProfile(Request $request): RedirectResponse
     {
-        $hospital = auth()->user()->hospital;
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        $user = auth()->user();
-        $updateType = $request->input('update_type');
-
-        if ($updateType === 'password') {
-            $request->validate([
-                'current_password' => 'required',
-                'new_password' => 'required|string|min:6|confirmed',
-            ], [
-                'new_password.confirmed' => 'The new password confirmation does not match.'
-            ]);
-            if (!\Hash::check($request->input('current_password'), $user->password_hash)) {
-                return back()->withErrors(['current_password' => 'Current password is incorrect.'])->withInput();
-            }
-            $user->password = $request->input('new_password');
-            $user->save();
-            return back()->with('success', 'Password updated successfully.');
-        }
-
-        if ($updateType === 'user_info') {
-            $request->validate([
-                'first_name' => 'required|string|max:100',
-                'last_name' => 'required|string|max:100',
-                'user_email' => 'required|email|max:255',
-                'user_phone' => 'required|string|max:30',
-                'user_profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
-            if ($request->hasFile('user_profile_picture')) {
-                if ($user->profile_picture) {
-                    \Storage::disk('public')->delete($user->profile_picture);
-                }
-                $userPath = $request->file('user_profile_picture')->store('profile-pictures', 'public');
-                $user->profile_picture = $userPath;
-            }
-            $user->first_name = $request->input('first_name');
-            $user->last_name = $request->input('last_name');
-            $user->email = $request->input('user_email');
-            $user->phone = $request->input('user_phone');
-            $user->save();
-            return back()->with('success', 'User information updated successfully.');
-        }
-
-        if ($updateType === 'hospital_info') {
-            $request->validate([
-                'name' => 'required|string|max:100',
-                'location' => 'required|string',
-                'province' => 'required|string|max:100',
-                'contact_info' => 'required|string',
-                'information' => 'required|string',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            ]);
-            $updateData = $request->only(['name', 'location', 'province', 'contact_info', 'information']);
-            if ($request->hasFile('profile_picture')) {
-                if ($hospital->profile_picture) {
-                    \Storage::disk('public')->delete($hospital->profile_picture);
-                }
-                $path = $request->file('profile_picture')->store('hospital-profile-pictures', 'public');
-                $updateData['profile_picture'] = $path;
-            }
-            $hospital->update($updateData);
-            return back()->with('success', 'Hospital information updated successfully.');
-        }
-
-        return back()->with('error', 'Invalid update request.');
+        return match ($request->input('update_type')) {
+            'password' => $this->updatePassword($request),
+            'user_info' => $this->updateAdminInfo($request),
+            'hospital_info' => $this->updateHospitalInfo($request),
+            default => back()->with('error', 'Invalid update request.'),
+        };
     }
-    
-    public function subscription()
+
+    public function subscription(): View
     {
-        $hospital = auth()->user()->hospital;
-        
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        
-        $subscription = $hospital->subscriptions->first();
-        
-        return view('hospital.subscription', compact('hospital', 'subscription'));
+        $hospital = $this->hospital();
+
+        return view('hospital.subscription', ['hospital' => $hospital, 'subscription' => $hospital->subscription]);
     }
-    
-    public function updateSubscription(Request $request)
+
+    public function updateSubscription(Request $request): RedirectResponse
     {
-        $hospital = auth()->user()->hospital;
-        
-        if (!$hospital) {
-            return redirect()->route('home')->with('error', 'Hospital not found.');
-        }
-        
-        $request->validate([
-            'plan_type' => 'required|in:basic,premium,enterprise'
-        ]);
-        
-        $subscription = $hospital->subscriptions->first();
-        
-        if ($subscription) {
-            $subscription->update([
-                'plan_type' => $request->plan_type,
-                'status' => 'active',
-                'start_date' => now(),
-                'end_date' => now()->addYear()
-            ]);
-        } else {
-            $hospital->subscriptions()->create([
-                'plan_type' => $request->plan_type,
-                'status' => 'active',
-                'start_date' => now(),
-                'end_date' => now()->addYear()
-            ]);
-        }
-        
+        // Only the plan is forwarded. The demo card fields are never sent or stored.
+        $data = $request->validate(['plan_type' => 'required|in:basic,premium,enterprise']);
+
+        $this->api->put('my-hospital/subscription', $data);
+
         return back()->with('success', 'Subscription updated successfully.');
     }
-    
-    public function cancelSubscription()
+
+    public function cancelSubscription(): RedirectResponse
     {
-        $hospital = auth()->user()->hospital;
-        if (!$hospital || !$hospital->subscriptions->first()) {
-            return back()->with('error', 'No active subscription found.');
-        }
-        $hospital->subscriptions->first()->update(['status' => 'cancelled']);
+        $this->api->post('my-hospital/subscription/cancel');
+
         return back()->with('success', 'Subscription cancelled.');
+    }
+
+    private function updatePassword(Request $request): RedirectResponse
+    {
+        $this->api->put('me/password', $request->validate(ProfileController::passwordRules()));
+
+        return back()->with('success', 'Password updated successfully.');
+    }
+
+    private function updateAdminInfo(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'user_email' => 'required|email|max:100',
+            'user_phone' => 'required|string|max:20',
+            'user_profile_picture' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+        ]);
+
+        $user = $this->api->post('me', array_filter([
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['user_email'],
+            'phone' => $data['user_phone'],
+            'profile_picture' => $data['user_profile_picture'] ?? null,
+        ]), ['email' => 'user_email', 'phone' => 'user_phone', 'profile_picture' => 'user_profile_picture'])['data'];
+
+        Auth::guard()->setAccount($user);
+
+        return back()->with('success', 'User information updated successfully.');
+    }
+
+    private function updateHospitalInfo(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'location' => 'required|string|max:500',
+            'province' => 'required|string|max:100',
+            'contact_info' => 'required|string|max:500',
+            'information' => 'required|string|max:2000',
+            'profile_picture' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
+        ]);
+
+        $this->api->post('my-hospital', array_filter($data));
+
+        return back()->with('success', 'Hospital information updated successfully.');
+    }
+
+    private function hospital(): Hospital
+    {
+        return Hospital::fromApi($this->api->get('my-hospital')['data']);
     }
 }

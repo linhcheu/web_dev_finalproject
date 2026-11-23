@@ -17,12 +17,12 @@
                 </div>
             </div>
             @if($hospital->profile_picture)
-                <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="Profile Picture" class="hospital-profile-img" style="width:180px;height:180px;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.12);object-fit:cover;background:#f3f4f6;">
+                <img src="{{ media_url($hospital->profile_picture) }}" alt="Profile Picture" class="hospital-profile-img" style="width:180px;height:180px;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.12);object-fit:cover;background:#f3f4f6;">
             @endif
         </div>
         <!-- Content: White, glassmorphism -->
         <div class="hospital-content section-white" style="margin-bottom:2rem;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border-radius:1.5rem;box-shadow:0 8px 32px 0 rgba(0,0,0,0.12);padding:2.5rem 2rem;">
-            <div class="content-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:2rem;">
+            <div class="content-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:2rem;">
                 <!-- Hospital Information -->
                 <div class="info-section" style="background:transparent;box-shadow:none;">
                     <h2 style="padding:1.5rem 0 0.5rem 0;margin:0;color:var(--primary-color);"><i class="fas fa-info-circle"></i> About This Hospital</h2>

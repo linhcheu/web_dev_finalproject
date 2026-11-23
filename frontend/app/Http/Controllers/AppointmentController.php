@@ -2,73 +2,59 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Hospital;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 
+/** A patient's appointments. */
 class AppointmentController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $query = auth()->user()->appointments()
-            ->with('hospital')
-            ->orderBy('appointment_date', 'asc');
+        $request->validate(['date' => 'nullable|date']);
 
-        if ($request->filled('date')) {
-            $query->whereDate('appointment_date', $request->date);
-        }
+        return view('appointments.index', [
+            'appointments' => $this->api->paginate('appointments', Appointment::class, $request->only('date', 'page')),
+        ]);
+    }
 
-        $appointments = $query->paginate(10);
-        return view('appointments.index', compact('appointments'));
-    }
-    
-    public function create()
+    public function create(): View
     {
-        $hospitals = Hospital::active()
-            ->withActiveSubscription()
-            ->get();
-        return view('appointments.create', compact('hospitals'));
+        return view('appointments.create', [
+            'hospitals' => Hospital::collectionFromApi($this->api->get('bookable-hospitals')['data']),
+        ]);
     }
-    
-    public function store(Request $request)
+
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'hospital_id' => 'required|exists:hospitals,hospital_id',
+        $data = $request->validate([
+            'hospital_id' => 'required|integer',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required|date_format:H:i',
             'symptom' => 'required|string|max:500',
             'patient_phone' => 'required|string|min:8|max:20',
         ]);
-        
-        $appointment = auth()->user()->appointments()->create([
-            'hospital_id' => $request->hospital_id,
-            'appointment_date' => $request->appointment_date,
-            'appointment_time' => $request->appointment_time,
-            'symptom' => $request->symptom,
-            'patient_phone' => $request->patient_phone,
-        ]);
-        
-        return redirect()->route('appointments.receipt', $appointment)
+
+        $appointment = $this->api->post('appointments', $data)['data'];
+
+        return redirect()->route('appointments.receipt', $appointment['appointment_id'])
             ->with('success', 'Appointment booked successfully!');
     }
-    
-    public function show(Appointment $appointment)
+
+    public function show(int $appointment): View
     {
-        if ($appointment->user_id !== auth()->id()) {
-            abort(403);
-        }
-        
-        $appointment->load('hospital');
-        return view('appointments.show', compact('appointment'));
+        return view('appointments.show', ['appointment' => $this->find($appointment)]);
     }
-    
-    public function receipt(Appointment $appointment)
+
+    public function receipt(int $appointment): View
     {
-        if ($appointment->user_id !== auth()->id()) {
-            abort(403);
-        }
-        
-        $appointment->load('hospital');
-        return view('appointments.receipt', compact('appointment'));
+        return view('appointments.receipt', ['appointment' => $this->find($appointment)]);
+    }
+
+    private function find(int $id): Appointment
+    {
+        return Appointment::fromApi($this->api->get("appointments/$id")['data']);
     }
 }

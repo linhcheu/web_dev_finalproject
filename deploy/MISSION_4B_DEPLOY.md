@@ -1,29 +1,35 @@
 # Mission 4b — Deploy CareConnect to a DigitalOcean Droplet
 
-This guide follows **Mission 4b** in *Cloud Computing Lab Notes — Missions 3a–4b*,
-adapted to **this** repository. Your laptop is **Fedora + kitty**. The server is **Ubuntu 24.04**.
+This guide follows **Mission 4b** in *Cloud Computing Lab Notes — Missions 3a–4b*, adapted to
+**this** repository. Your laptop runs **Fedora + kitty**; the server runs **Ubuntu 24.04**.
+Every step was tested on Ubuntu 24.04 with Apache and MySQL 8.0 before it was written down.
 
-**Result:**
+## What you are deploying
 
-| URL | What it is | Folder in this repo |
-|---|---|---|
-| `http://YOUR_SERVER_IP/` | CareConnect website (patients + hospital admins) | `frontend/` |
-| `http://YOUR_SERVER_IP:8080/` | CareConnect admin panel | `backend/` |
+CareConnect is three Laravel 12 apps on **one** Droplet:
 
-Both apps are **Laravel 12**, so they work on PHP 8.4 (see the Mission 4b version table). They share **one MySQL database**.
-`frontend/` owns the migration that creates all the tables.
-The `api/` folder is a separate JSON API. The website doesn't need it, so it is not deployed here. See the end of this guide if you want it.
+| App | Folder | URL | Talks to |
+|---|---|---|---|
+| Website (patients + hospital admins) | `frontend/` | `http://YOUR_SERVER_IP/` | the API |
+| Admin panel (platform admins) | `backend/` | `http://YOUR_SERVER_IP:8080/` | the API |
+| REST API | `api/` | `http://127.0.0.1:8081` (inside the server only) | **MySQL** |
 
 ```
-Fedora laptop                      Ubuntu 24.04 Droplet (SGP1, 2 GB)
-─────────────                      ─────────────────────────────────────────────
-Browser ── http :80 ──────────▶    Apache ─▶ /var/www/careconnect/frontend/public ─┐
-Browser ── http :8080 ────────▶    Apache ─▶ /var/www/careconnect/backend/public  ─┤
-kitty   ── ssh :22 ───────────▶    SSH                                             ├─▶ MySQL 8  careconnect_db
-DBeaver ── :3306 (home IP only) ─────────────────────────────────────────────────────┘
+Fedora laptop                         Ubuntu 24.04 Droplet (SGP1, 2 GB)
+─────────────                         ────────────────────────────────────────────────────────
+Browser ── http :80   ───────────▶    Apache ─▶ frontend/public ──┐
+Browser ── http :8080 ───────────▶    Apache ─▶ backend/public  ──┤ HTTP + token
+                                                                   ▼
+                                      Apache 127.0.0.1:8081 ─▶ api/public ─▶ MySQL 8 careconnect_db
+kitty   ── ssh :22 ──────────────▶    SSH
+DBeaver ── :3306 (home IP only) ───────────────────────────────────────▶ MySQL
 ```
 
----
+Explain these points in the video:
+
+* **Only the API touches the database.** The website and admin panel have no database settings at all. They call the API and send a login token with each request.
+* **The API is not public.** It listens on `127.0.0.1`, so only the two web apps on the same server can reach it. ufw doesn't need to open 8081.
+* **Uploaded pictures** are stored by the API (`api/storage/app/public`). The two web apps serve them at `/storage/...`, and PHP is switched off in that folder.
 
 ## 0. Write your real values down FIRST (Lessons learned #7 and #8)
 
@@ -35,6 +41,7 @@ Do not type a CAPITAL placeholder into a command. Fill in this table on paper or
 | `YOUR_HOME_IP` | | On Fedora: `curl -4 ifconfig.me ; echo` |
 | `YOUR_MYSQL_USER` | e.g. `linhcheu` | your name, lowercase, no spaces |
 | `YOUR_MYSQL_PASSWORD` | | your own strong password, e.g. 8+ chars with `Aa1#` |
+| `YOUR_ADMIN_PASSWORD` | | password for the admin panel login (`admin@careconnect.com`) |
 | Database name | `careconnect_db` | (this guide uses this name) |
 
 Rules from the notes: **one command at a time**, read the output before you run the next command, and keep **two kitty tabs** open (Ctrl+Shift+T).
@@ -215,7 +222,7 @@ ufw status
 cd /var/www
 git clone https://github.com/linhcheu/web_dev_finalproject.git careconnect
 cd /var/www/careconnect
-ls                                    # frontend/  backend/  api/  deploy/ ...
+ls                                    # api/  frontend/  backend/  deploy/  README.md
 ```
 
 * If the repo is **private**, GitHub asks for a username and a **Personal Access Token** (GitHub → Settings → Developer settings → Tokens). Your normal password won't work.
@@ -240,167 +247,138 @@ cd /var/www && unzip careconnect.zip && mv web_dev_finalproject careconnect
 
 ---
 
-## 7. Mission 4b Step 3: dependencies and .env (both apps)
+## 7. Mission 4b Step 3: dependencies and .env (three apps)
 
-Explain this in the video: `vendor/` is **not** uploaded because it's large, and Composer rebuilds it from `composer.lock`.
-
-### Website (`frontend/`)
+Explain this in the video: `vendor/` is **not** uploaded because Composer rebuilds it from `composer.lock`. `--no-dev` skips test tools that a server doesn't need.
 
 ```bash
-cd /var/www/careconnect/frontend
-pwd                                   # /var/www/careconnect/frontend  (artisan only works here)
-composer install --optimize-autoloader
-cp ../deploy/env/frontend.env.example .env
-micro .env                            # replace YOUR_SERVER_IP, YOUR_MYSQL_USER, YOUR_MYSQL_PASSWORD
-php artisan key:generate
+cd /var/www/careconnect/api      && composer install --no-dev --optimize-autoloader
+cd /var/www/careconnect/frontend && composer install --no-dev --optimize-autoloader
+cd /var/www/careconnect/backend  && composer install --no-dev --optimize-autoloader
 ```
 
-### Admin panel (`backend/`)
-
-```bash
-cd /var/www/careconnect/backend
-composer install --optimize-autoloader
-cp ../deploy/env/backend.env.example .env
-micro .env                            # same DB values, APP_URL=http://YOUR_SERVER_IP:8080
-php artisan key:generate
-```
-
-Check that you replaced every placeholder in both files. These two commands should print **nothing**:
-
-```bash
-grep -n YOUR_ /var/www/careconnect/frontend/.env
-grep -n YOUR_ /var/www/careconnect/backend/.env
-```
-
-The `.env` files set things this project needs: `SESSION_DRIVER=file`, **different** `SESSION_COOKIE` names per app (otherwise the two apps on the same IP log each other out → *419 Page Expired*), `CACHE_STORE=file` and `QUEUE_CONNECTION=sync` (the project has no cache or jobs tables), and `MAIL_MAILER=log` (DigitalOcean blocks SMTP).
-
----
-
-## 8. Mission 4b Step 4: create the tables and data
-
-**Option A (recommended): migrations + seeders.** These create all tables plus demo hospitals, users, appointments and feedback.
-
-```bash
-cd /var/www/careconnect/frontend
-php artisan config:clear
-php artisan migrate --seed --force    # creates users_table, admins_table, hospitals, subscriptions, appointments, feedback, ...
-php artisan db:show                   # must say MySQL 8 and list the tables (Lessons learned #12)
-
-cd /var/www/careconnect/backend
-php artisan config:clear
-php artisan db:seed --force           # creates the platform admin account
-```
-
-The **only** table creator is `frontend`. Don't run `migrate` in `backend/` because it has no migrations of its own.
-
-**Option B: import your own data from your laptop.** On Fedora, export with DBeaver (right-click DB → Tools → Dump database) or with `mysqldump -u root -p your_local_db > careconnect.sql`. Then upload and import it:
-
-```bash
-# Fedora
-scp careconnect.sql root@YOUR_SERVER_IP:/var/www/
-# server
-mysql careconnect_db < /var/www/careconnect.sql
-mysql -e "USE careconnect_db; SHOW TABLES;"
-```
-
-If you see `Unknown collation 'utf8mb4_uca1400_ai_ci'`, the dump came from MariaDB. Fix it with `sed -i 's/utf8mb4_uca1400_ai_ci/utf8mb4_unicode_ci/g' /var/www/careconnect.sql` and import again.
-
----
-
-## 9. Mission 4b Step 5: permissions and shared uploads
-
-Apache runs as **www-data**, so it must be able to write `storage/` (logs, sessions, uploaded pictures) and `bootstrap/cache`.
-
-Both apps show the **same** pictures. A hospital logo uploaded on the website must also appear in the admin panel, and the other way round. To do that, make the admin panel use the website's upload folder:
+Copy the production `.env` templates, then fill them in:
 
 ```bash
 cd /var/www/careconnect
-rm -rf backend/storage/app/public
-ln -s /var/www/careconnect/frontend/storage/app/public backend/storage/app/public
+cp deploy/env/api.env.example      api/.env
+cp deploy/env/frontend.env.example frontend/.env
+cp deploy/env/backend.env.example  backend/.env
 
-cd /var/www/careconnect/frontend && php artisan storage:link
-cd /var/www/careconnect/backend  && php artisan storage:link
+micro api/.env         # YOUR_MYSQL_USER, YOUR_MYSQL_PASSWORD, YOUR_ADMIN_PASSWORD
+micro frontend/.env    # YOUR_SERVER_IP (2 places)
+micro backend/.env     # YOUR_SERVER_IP (2 places)
 
-cd /var/www/careconnect
-chown -R www-data:www-data frontend/storage frontend/bootstrap/cache backend/storage backend/bootstrap/cache
-chmod -R 775 frontend/storage frontend/bootstrap/cache backend/storage backend/bootstrap/cache
+grep -n YOUR_ api/.env frontend/.env backend/.env    # must print NOTHING
+
+cd api      && php artisan key:generate && cd ..
+cd frontend && php artisan key:generate && cd ..
+cd backend  && php artisan key:generate && cd ..
 ```
 
-Allow uploads up to 20 MB (the default is only 2 MB):
+Already set in the templates:
 
-```bash
-sed -i 's/^upload_max_filesize = .*/upload_max_filesize = 20M/; s/^post_max_size = .*/post_max_size = 25M/' /etc/php/8.4/apache2/php.ini
-grep -E '^(upload_max_filesize|post_max_size)' /etc/php/8.4/apache2/php.ini
-```
-
-**Mission 4b Step 6 (Vite) is not needed.** The pages use plain CSS and JS from `public/`, not `@vite`, so `npm` is not required.
+* **Different `SESSION_COOKIE` per app.** Without it, the two apps on one IP log each other out ("419 Page Expired").
+* **`MAIL_MAILER=log`**, because DigitalOcean blocks SMTP.
+* **`APP_DEBUG=false`**, so error pages never show code or passwords. While testing you may set `true`; turn it off again afterwards.
 
 ---
 
-## 10. Mission 4b Step 7: Apache virtual hosts
+## 8. Mission 4b Step 4: create the tables and data (API only)
 
-The two vhost files are ready in `deploy/apache/`:
+```bash
+cd /var/www/careconnect/api
+php artisan migrate --seed --force    # all tables + demo hospitals, users, appointments, feedback + the admin account
+php artisan db:show                   # must say MySQL 8 and list 8 tables (Lessons learned #12)
+```
+
+`migrate` and `db:seed` are only ever run in `api/`. The other two apps have no database.
+
+Demo logins created by the seeders:
+
+| Where | E-mail | Password |
+|---|---|---|
+| Admin panel `:8080` | `admin@careconnect.com` (or `ADMIN_EMAIL`) | your `ADMIN_PASSWORD` |
+| Website, hospital admin | `mysql -e "SELECT email FROM careconnect_db.users_table WHERE role='hospital_admin' LIMIT 3;"` | `11111111` |
+| Website, patient | `mysql -e "SELECT email FROM careconnect_db.users_table WHERE role='user' LIMIT 3;"` | `11111111` |
+
+You can also register new accounts on the website.
+
+**Your own data instead (optional).** Export your local database to a `.sql` file (DBeaver: right-click → Tools → Dump database). Upload it with `scp careconnect.sql root@YOUR_SERVER_IP:/var/www/`, then run `mysql careconnect_db < /var/www/careconnect.sql` instead of `migrate --seed`. If you see a MariaDB collation error, run `sed -i 's/utf8mb4_uca1400_ai_ci/utf8mb4_unicode_ci/g' /var/www/careconnect.sql` and import again.
+
+---
+
+## 9. Mission 4b Step 5: storage link and permissions
+
+Apache runs as **www-data**, and it must be able to write logs, sessions and uploaded pictures:
+
+```bash
+cd /var/www/careconnect/api && php artisan storage:link
+cd /var/www/careconnect
+chown -R www-data:www-data api/storage api/bootstrap/cache frontend/storage frontend/bootstrap/cache backend/storage backend/bootstrap/cache
+chmod -R 775             api/storage api/bootstrap/cache frontend/storage frontend/bootstrap/cache backend/storage backend/bootstrap/cache
+```
+
+**Mission 4b Step 6 (Vite / npm) is not needed.** The website uses plain CSS from `frontend/public/css`. The admin panel's Tailwind CSS is already built into `backend/public/css/admin.css`.
+
+---
+
+## 10. Mission 4b Step 7: three Apache virtual hosts
 
 ```bash
 cp /var/www/careconnect/deploy/apache/careconnect.conf       /etc/apache2/sites-available/
 cp /var/www/careconnect/deploy/apache/careconnect-admin.conf /etc/apache2/sites-available/
+cp /var/www/careconnect/deploy/apache/careconnect-api.conf   /etc/apache2/sites-available/
 a2enmod rewrite
 a2dissite 000-default.conf            # (and laravel.conf, if you reused a Mission 4a server)
-a2ensite careconnect.conf
-a2ensite careconnect-admin.conf
-apache2ctl configtest                 # Syntax OK  (an AH00558 "ServerName" warning above it is harmless)
+a2ensite careconnect.conf careconnect-admin.conf careconnect-api.conf
+apache2ctl configtest                 # Syntax OK  (an AH00558 "ServerName" warning is harmless)
 systemctl restart apache2
-ufw allow 8080/tcp                    # admin panel port
-ufw status                            # 22, 80, 8080, 3306 (your IP)
-ls /etc/apache2/sites-enabled/        # only careconnect.conf + careconnect-admin.conf
+ufw allow 8080/tcp                    # admin panel. NOT 8081: the API stays private
+ufw status                            # 22, 80, 8080, 3306 (your IP only)
 ```
 
-Explain the key lines in the video. `DocumentRoot` ends in **/public**, so `.env` can never be downloaded. `AllowOverride All` lets Laravel's `.htaccess` rewrite URLs. `Listen 8080` makes Apache open the second port.
+Explain these in the video:
+
+* `DocumentRoot` ends in **/public**, so `.env` can never be downloaded.
+* `AllowOverride All` lets Laravel's `.htaccess` rewrite URLs.
+* `Listen 8080` opens the admin port.
+* `Listen 127.0.0.1:8081` keeps the API private.
+* `Alias /storage` serves the uploaded pictures.
 
 ---
 
 ## 11. Mission 4b Step 8: cache and test
 
 ```bash
-cd /var/www/careconnect/frontend && php artisan optimize:clear && php artisan optimize
-cd /var/www/careconnect/backend  && php artisan optimize:clear && php artisan optimize
-curl -I http://localhost/             # HTTP/1.1 200 OK
-curl -I http://localhost:8080/admin/login
+cd /var/www/careconnect
+for app in api frontend backend; do (cd $app && php artisan optimize); done
+chown -R www-data:www-data */storage */bootstrap/cache
+
+curl -s http://127.0.0.1:8081/api/v1/home | head -c 150; echo    # API answers with JSON
+curl -I http://localhost/                                         # 200 OK
+curl -I http://localhost:8080/admin/login                         # 200 OK
 ```
 
-**Remember:** after **any** `.env` edit, run `php artisan optimize:clear` in that app. Otherwise your change is ignored.
+After **any** `.env` change, run `php artisan optimize:clear && php artisan optimize` in that app.
 
-Now open these in your browser:
+Then test in your browser:
 
-| Test | URL | Login |
-|---|---|---|
-| Website home, hospitals list | `http://YOUR_SERVER_IP/` | none |
-| Patient | `http://YOUR_SERVER_IP/login` | register a new account, or a seeded user (below) |
-| Hospital admin | `http://YOUR_SERVER_IP/login` | seeded hospital admin (below) |
-| Platform admin panel | `http://YOUR_SERVER_IP:8080/` | `admin@careconnect.com` / `admin123` |
-
-To list the seeded accounts, use DBeaver or run:
-`mysql -e "SELECT email, role FROM careconnect_db.users_table;"`
-The password is set in `frontend/database/seeders/*Seeder.php`.
-
-The demo for the video goes like this:
-
-1. **Register** a patient on the website.
+1. Open `http://YOUR_SERVER_IP/` and **register** a patient.
 2. **Book an appointment**.
-3. **Upload a profile picture**. On the profile page, click **Edit** first, because the fields stay locked until you do.
+3. **Upload a profile picture**. On the profile page, click **Edit** first.
 4. In DBeaver, refresh `users_table` and `appointments`. The new rows are there.
-5. In the admin panel (`:8080`), **edit or delete** that appointment or user.
-6. Refresh DBeaver again.
+5. Open `http://YOUR_SERVER_IP:8080/` and log in as the admin.
+6. **Edit or delete** that appointment.
+7. Refresh DBeaver again.
 
-When everything works, set `APP_DEBUG=false` in **both** `.env` files, then run `php artisan optimize:clear && php artisan optimize` in both folders.
+Hospital sign-ups (`/hospital-register`) start as **pending**. Approve one in the admin panel: **Hospitals → Edit → Approval status: Active**. It then appears on the website.
 
 ### Final check (run on camera)
 
 ```bash
 bash /var/www/careconnect/deploy/scripts/check.sh
 ```
-
-The script prints the Ubuntu, Apache, PHP, Composer and MySQL versions and `ufw status`. It also prints both apps' `db:show` and HTTP status codes. It only reads; it changes nothing.
 
 ---
 
@@ -412,7 +390,7 @@ The script prints the Ubuntu, Apache, PHP, Composer and MySQL versions and `ufw 
 * **Driver properties** tab: `allowPublicKeyRetrieval = true`, `useSSL = false`
 * **Test Connection** → Finish → `careconnect_db` → Tables
 
-At school the IP is different, so DBeaver can't connect directly. Use the **SSH** tab: tick *Use SSH Tunnel* with host `YOUR_SERVER_IP`, user `root`, and your key. Then on the Main tab use host `127.0.0.1`.
+At school the IP is different. Use the **SSH** tab instead: tick *Use SSH Tunnel* with host `YOUR_SERVER_IP`, user `root`, and your key. Then on the Main tab use host `127.0.0.1`.
 
 ---
 
@@ -422,30 +400,33 @@ Push your changes to GitHub from Fedora, then run on the server:
 
 ```bash
 cd /var/www/careconnect && git pull
-cd frontend && composer install --optimize-autoloader && php artisan migrate --force && php artisan optimize:clear && php artisan optimize
-cd ../backend && composer install --optimize-autoloader && php artisan optimize:clear && php artisan optimize
+for app in api frontend backend; do (cd $app && composer install --no-dev --optimize-autoloader && php artisan optimize:clear); done
+(cd api && php artisan migrate --force)
+for app in api frontend backend; do (cd $app && php artisan optimize); done
+chown -R www-data:www-data */storage */bootstrap/cache
 ```
 
 ---
 
-## If it fails: errors specific to this project
+## If it fails
+
+First read the log of the app that failed: `tail -n 50 /var/www/careconnect/<app>/storage/logs/laravel.log`, or the Apache logs in `/var/log/apache2/careconnect*_error.log`.
 
 | What you see | Why | Fix |
 |---|---|---|
-| **419 Page Expired** when logging in | Both apps use the same cookie name, or `storage/` isn't writable | Different `SESSION_COOKIE` in each `.env` (already set in the templates), redo the `chown` lines in section 9, then `php artisan optimize:clear` |
-| `Table 'careconnect_db.cache' doesn't exist` | `.env` still says `CACHE_STORE=database` | `CACHE_STORE=file`, `QUEUE_CONNECTION=sync`, then `php artisan optimize:clear` |
-| `Table 'careconnect_db.sessions' doesn't exist` | `SESSION_DRIVER=database` without the migration | `SESSION_DRIVER=file`, then `optimize:clear` |
-| Admin panel: `Base table ... admins_table doesn't exist` | Migrations not run yet | `cd frontend && php artisan migrate --seed --force` |
-| Admin login says invalid credentials | Backend seeder not run | `cd backend && php artisan db:seed --force` |
-| Picture uploaded but shows broken (404 `/storage/...`) | `storage:link` missing, or wrong `APP_URL` | Section 9 again; `APP_URL` = `http://YOUR_SERVER_IP` (`:8080` for the admin) |
-| Picture visible in the website but not in the admin panel | The shared-uploads symlink was skipped | The `rm -rf` + `ln -s` lines in section 9, then `storage:link` in `backend` |
-| `:8080` times out | Port not open | `ufw allow 8080/tcp`; `ss -tlnp \| grep 8080` must show apache2 |
-| `:8080` shows the website instead of the admin panel | `careconnect-admin.conf` not enabled | `a2ensite careconnect-admin.conf && systemctl reload apache2` |
-| `SQLSTATE[HY000] [1045] Access denied` | Wrong password in `.env` or MySQL | Check the quotes in `DB_PASSWORD="..."`, then `php artisan config:clear` |
+| Website or admin page: **503 "service is unavailable"** | The web app can't reach the API | `curl http://127.0.0.1:8081/api/v1/home`. If that fails: `a2ensite careconnect-api.conf && systemctl reload apache2`, and check `API_URL=http://127.0.0.1:8081` in `frontend/.env` / `backend/.env` |
+| **502 "Something went wrong"** | The API itself returned an error | `tail -n 50 /var/www/careconnect/api/storage/logs/laravel.log` |
+| API log: `SQLSTATE[HY000] [1045] Access denied` | Wrong DB user or password in `api/.env` | Fix it, keep the quotes around the password, then `php artisan optimize:clear` |
+| API log: `Base table or view not found` | Migrations not run | `cd api && php artisan migrate --seed --force` |
+| **419 Page Expired** | Same cookie name in both web apps, or `storage/` not writable | Different `SESSION_COOKIE` per app, redo the `chown` in section 9, `optimize:clear` |
+| Pictures broken (404 on `/storage/...`) | `storage:link` missing, or wrong `API_MEDIA_URL` | `cd api && php artisan storage:link`; `API_MEDIA_URL=http://YOUR_SERVER_IP/storage` (`:8080/storage` in `backend/.env`) |
+| Admin login: *Invalid admin credentials* | Wrong password, or the seeder didn't run | `cd api && php artisan db:seed --class=AdminSeeder --force` (uses `ADMIN_EMAIL` / `ADMIN_PASSWORD`) |
+| "Too many attempts" at login | Brute-force protection: 5 tries per minute per e-mail | Wait one minute |
+| Hospital I registered doesn't appear | New hospitals are *pending* | Approve it in the admin panel (Hospitals → Edit) |
+| `:8080` times out | Port closed | `ufw allow 8080/tcp`; `ss -tlnp \| grep 8080` must show apache2 |
 | `could not find driver` | `php8.4-mysql` missing | `apt install -y php8.4-mysql && systemctl restart apache2` |
 | Composer `Killed` | Out of memory | Add swap (section 3) |
-| Admin panel `/sub`: `View [subcription] not found` | `backend/resources/views/subcription.blade.php` (and `subscription_edit`) were never committed to the repo. This was tested: every other admin page works | Copy those view files from your laptop into `backend/resources/views/` and push. The page isn't in the admin menu, so you can skip it for the demo |
-| Any 500 error | It's in the log | `tail -n 50 /var/www/careconnect/frontend/storage/logs/laravel.log` (or `backend/...`) and `tail -n 50 /var/log/apache2/careconnect_error.log` |
+| `.env` change does nothing | Config is cached | `php artisan optimize:clear` in that app |
 
 The general troubleshooting table and the *Lessons learned* in the lab notes still apply.
 
@@ -453,20 +434,7 @@ The general troubleshooting table and the *Lessons learned* in the lab notes sti
 
 ## Before you destroy the Droplet
 
-- [ ] Website on `:80` and admin panel on `:8080` both work, including login, CRUD and upload
+- [ ] Website `:80` and admin panel `:8080` work, including login, booking, upload and admin edit/delete
 - [ ] DBeaver connected; data change shown live
 - [ ] Screenshots taken, video recorded (face + voice), PDF + video **submitted**
 - [ ] **Grade received.** Only then: Droplet → *Destroy*, or *Snapshots → Take Live Snapshot* first if you want to keep it cheaply
-
----
-
-## Optional: also deploy the JSON API (`api/`)
-
-Not needed for the website. If your teacher wants it, use port **8081**:
-
-1. Copy `careconnect-admin.conf` to `careconnect-api.conf` and change `8080` to `8081` and `backend` to `api`.
-2. Copy `backend.env.example` to `api/.env` and set `APP_URL=...:8081` and `SESSION_COOKIE=careconnect_api_session`.
-3. Run `composer install` and `key:generate`.
-4. Run `php artisan migrate --force` in `api/`. This adds Sanctum's `personal_access_tokens` table.
-5. Run `chown` on `api/storage` and `api/bootstrap/cache`.
-6. Run `a2ensite careconnect-api.conf`, then `ufw allow 8081/tcp`.

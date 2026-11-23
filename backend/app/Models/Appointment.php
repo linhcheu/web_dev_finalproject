@@ -2,37 +2,46 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
-class Appointment extends Model
+class Appointment extends ApiModel
 {
-    use HasFactory;
-
     protected $primaryKey = 'appointment_id';
-
-    protected $fillable = [
-        'user_id',
-        'hospital_id',
-        'appointment_date',
-        'appointment_time',
-        'patient_phone',
-        'symptom',
-        'status'
-    ];
 
     protected $casts = [
         'appointment_date' => 'date',
-        'appointment_time' => 'datetime:H:i',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    public function user()
+    protected array $apiRelations = [
+        'user' => [User::class, false],
+        'hospital' => [Hospital::class, false],
+    ];
+
+    public function isUpcoming(): bool
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->appointment_date?->gte(today()) ?? false;
     }
 
-    public function hospital()
+    public function getFormattedDateAttribute(): string
     {
-        return $this->belongsTo(Hospital::class, 'hospital_id', 'hospital_id');
+        return $this->appointment_date?->format('F j, Y') ?? '';
     }
-} 
+
+    public function getFormattedTimeAttribute(): ?string
+    {
+        return $this->appointment_time ? Carbon::parse($this->appointment_time)->format('g:i A') : null;
+    }
+
+    public function getTimeUntilAttribute(): string
+    {
+        $days = (int) today()->diffInDays($this->appointment_date, false);
+
+        return match (true) {
+            $days > 0 => $days.' day'.($days > 1 ? 's' : '').' from now',
+            $days < 0 => abs($days).' day'.($days < -1 ? 's' : '').' ago',
+            default => 'Today',
+        };
+    }
+}

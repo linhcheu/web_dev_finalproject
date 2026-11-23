@@ -146,7 +146,7 @@
                         </div>
                     </div>
                     @if($hospital->profile_picture)
-                        <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="Profile Picture" class="dashboard-hospital-img">
+                        <img src="{{ media_url($hospital->profile_picture) }}" alt="Profile Picture" class="dashboard-hospital-img">
                     @endif
                 </div>
             </div>
@@ -198,7 +198,7 @@
                                         @endif
                                     </span>
                                     <span class="activity-text">
-                                        {!! $activity['description'] !!}
+                                        {{ $activity['description'] }}
                                     </span>
                                     <span class="activity-time">
                                         {{ \Carbon\Carbon::parse($activity['created_at'])->diffForHumans() }}

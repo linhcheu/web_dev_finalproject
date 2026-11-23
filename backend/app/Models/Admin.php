@@ -2,31 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
 
-class Admin extends Authenticatable
+/** The logged-in platform administrator. */
+class Admin extends ApiModel implements Authenticatable
 {
-    use Notifiable, HasApiTokens;
+    use AuthenticatableTrait;
 
-    protected $table = 'admins_table';
     protected $primaryKey = 'admin_id';
 
-    protected $fillable = [
-        'username',
-        'email',
-        'password_hash',
-        'profile_picture',
+    protected $casts = [
+        'created_at' => 'datetime',
     ];
 
-    protected $hidden = [
-        'password_hash',
-        'remember_token',
-    ];
-
-    public function getAuthPassword()
+    /** The layout and profile page show "name"; admins only have a username. */
+    public function getNameAttribute(): string
     {
-        return $this->password_hash;
+        return (string) $this->username;
     }
-} 
+}

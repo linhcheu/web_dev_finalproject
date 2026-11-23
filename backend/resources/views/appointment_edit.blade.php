@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('content')
     <style>
@@ -485,7 +487,7 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Date</span>
-                        <span class="info-value">{{ $appointment->appointment_date }}</span>
+                        <span class="info-value">{{ $appointment->appointment_date?->format('M j, Y') }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Time</span>
@@ -535,7 +537,7 @@
 
                     <div class="form-group">
                         <label for="appointment_date">Appointment Date</label>
-                        <input type="date" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', $appointment->appointment_date) }}" required>
+                        <input type="date" id="appointment_date" name="appointment_date" value="{{ old('appointment_date', $appointment->appointment_date?->toDateString()) }}" required>
                         @error('appointment_date')
                         <div class="error">{{ $message }}</div>
                         @enderror
@@ -543,16 +545,16 @@
 
                     <div class="form-group">
                         <label for="appointment_time">Appointment Time</label>
-                        <input type="time" id="appointment_time" name="appointment_time" value="{{ old('appointment_time', $appointment->appointment_time) }}" required>
+                        <input type="time" id="appointment_time" name="appointment_time" value="{{ old('appointment_time', substr((string) $appointment->appointment_time, 0, 5)) }}" required>
                         @error('appointment_time')
                         <div class="error">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label for="notes">Notes</label>
-                        <textarea id="notes" name="notes" placeholder="Enter appointment notes">{{ old('notes', $appointment->notes) }}</textarea>
-                        @error('notes')
+                        <label for="symptom">Symptoms</label>
+                        <textarea id="symptom" name="symptom" maxlength="500" placeholder="Symptoms or reason for the visit">{{ old('symptom', $appointment->symptom) }}</textarea>
+                        @error('symptom')
                         <div class="error">{{ $message }}</div>
                         @enderror
                     </div>

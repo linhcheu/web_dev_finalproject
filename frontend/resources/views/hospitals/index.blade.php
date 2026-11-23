@@ -44,7 +44,7 @@
                         </div>
                         <div class="hospital-image-section">
                             @if($hospital->profile_picture)
-                                <img src="{{ asset('storage/' . $hospital->profile_picture) }}" alt="Hospital Profile Picture" class="hospital-list-img" style="width:240px;height:180px;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.12);object-fit:cover;background:#f3f4f6;">
+                                <img src="{{ media_url($hospital->profile_picture) }}" alt="Hospital Profile Picture" class="hospital-list-img" style="width:240px;height:180px;border-radius:1rem;box-shadow:0 4px 24px rgba(0,0,0,0.12);object-fit:cover;background:#f3f4f6;">
                             @else
                                 <div class="hospital-icon" style="width:240px;height:180px;background:var(--primary-color);border-radius:1rem;display:flex;align-items:center;justify-content:center;color:white;font-size:4rem;box-shadow:0 4px 24px rgba(0,0,0,0.12);">
                                     <i class="fas fa-hospital"></i>

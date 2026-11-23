@@ -384,13 +384,21 @@
                 display: flex;
             }
             .nav-toggle {
-                display: block;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: 0;
+                padding: 6px;
                 cursor: pointer;
                 font-size: 2rem;
                 color: var(--primary-color);
                 margin-left: 1rem;
                 transition: transform 0.3s ease;
             }
+            .nav-toggle .icon-close { display: none; }
+            .nav-toggle[aria-expanded="true"] .icon-open { display: none; }
+            .nav-toggle[aria-expanded="true"] .icon-close { display: block; }
             .nav-toggle:hover {
                 transform: scale(1.1);
             }
@@ -560,7 +568,7 @@
                     <div class="user-menu" style="display:inline-block;position:relative;">
                         <button class="user-menu-btn" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" tabindex="0">
                             @if(auth()->user()->profile_picture)
-                                <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" alt="Profile" class="user-avatar">
+                                <img src="{{ media_url(auth()->user()->profile_picture) }}" alt="Profile" class="user-avatar">
                             @else
                                 <img src="https://ui-avatars.com/api/?name={{ auth()->user()->first_name }}" alt="Profile" class="user-avatar">
                             @endif
@@ -591,14 +599,16 @@
                 @endauth
             </div>
             <div class="nav-auth" style="display:none;"></div>
-            <div class="nav-toggle" id="navToggle" tabindex="0" aria-label="Open navigation menu">
-                <i class="fas fa-bars"></i>
-            </div>
+            <button type="button" class="nav-toggle" id="navToggle" aria-label="Open navigation menu" aria-controls="mainNavMenu" aria-expanded="false">
+                <svg class="icon-open" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <svg class="icon-close" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
         </div>
     </nav>
 
     <!-- Main Content -->
     <main class="main-content">
+        @include('partials.flash')
         @yield('content')
     </main>
 
@@ -638,23 +648,23 @@
         // Enhanced Mobile Navigation
         const navToggle = document.getElementById('navToggle');
         const navMenu = document.getElementById('mainNavMenu');
+        function setNavOpen(open) {
+            navMenu.classList.toggle('nav-menu-open', open);
+            navToggle.setAttribute('aria-expanded', String(open));
+            navToggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+        }
         navToggle.addEventListener('click', function(e) {
             e.stopPropagation();
-            navMenu.classList.toggle('nav-menu-open');
-            const icon = navToggle.querySelector('i');
-            if (navMenu.classList.contains('nav-menu-open')) {
-                icon.className = 'fas fa-times';
-            } else {
-                icon.className = 'fas fa-bars';
-            }
+            setNavOpen(!navMenu.classList.contains('nav-menu-open'));
         });
-        // Close mobile menu when clicking outside
+        // Close the mobile menu when clicking outside it or pressing Escape
         document.addEventListener('click', function(event) {
             if (!navToggle.contains(event.target) && !navMenu.contains(event.target)) {
-                navMenu.classList.remove('nav-menu-open');
-                const icon = navToggle.querySelector('i');
-                icon.className = 'fas fa-bars';
+                setNavOpen(false);
             }
+        });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') setNavOpen(false);
         });
 
         // User Dropdown (Profile) - robust, accessible, and mobile-friendly

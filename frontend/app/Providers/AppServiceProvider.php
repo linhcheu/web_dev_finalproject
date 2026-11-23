@@ -2,26 +2,25 @@
 
 namespace App\Providers;
 
+use App\Services\Api\ApiClient;
+use App\Services\Api\ApiSessionGuard;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(ApiClient::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Workaround for cURL error 60 on Windows/Wamp
-        if (app()->environment('local')) {
-            putenv('CURL_CA_BUNDLE=C:/wamp64/bin/php/php8.3.14/cacert.pem');
-        }
+        // "api-session" guard: the account + API token live in the session (see config/auth.php).
+        Auth::extend('api-session', fn ($app, string $name, array $config) => new ApiSessionGuard(
+            $name,
+            $config['model'],
+            $app['session.store'],
+        ));
     }
 }

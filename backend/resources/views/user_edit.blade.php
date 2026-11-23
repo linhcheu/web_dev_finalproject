@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('handles_flash', '1')
+@section('handles_errors', '1')
 
 @section('content')
     <style>
@@ -724,9 +726,9 @@
                         <div class="profile-picture-container">
                             <div style="position: relative; display: inline-block;">
                                 @if($user->profile_picture)
-                                    <img src="{{ asset('storage/' . $user->profile_picture) }}?v={{ time() }}" alt="Profile Picture" class="profile-picture" id="profile-preview">
+                                    <img src="{{ media_url($user->profile_picture) }}?v={{ time() }}" alt="Profile Picture" class="profile-picture" id="profile-preview">
                                     <!-- Debug: {{ $user->profile_picture }} -->
-                                    <!-- Debug URL: {{ asset('storage/' . $user->profile_picture) }} -->
+                                    <!-- Debug URL: {{ media_url($user->profile_picture) }} -->
                                 @else
                                     <img src="{{ asset('images/default-profile.jpg') }}?v={{ time() }}" alt="Default Profile" class="profile-picture" id="profile-preview">
                                     <!-- Debug: No profile picture found -->

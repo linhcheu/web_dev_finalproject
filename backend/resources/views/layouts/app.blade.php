@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>CareConnect Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
         @keyframes pulse {
             0%, 100% {
@@ -95,6 +95,7 @@
 
         /* Dropdown animation */
         .dropdown-menu {
+            display: none;
             opacity: 0;
             transform: translateY(-10px) scale(0.95);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -102,6 +103,7 @@
         }
 
         .dropdown-menu.show {
+            display: block;
             opacity: 1;
             transform: translateY(0) scale(1);
             pointer-events: auto;
@@ -352,7 +354,8 @@
                 padding: 0.5rem !important;
             }
             .dropdown-menu {
-                min-width: 90vw !important;
+                min-width: 12rem !important;
+                max-width: calc(100vw - 32px);
                 right: 0 !important;
                 left: 0 !important;
             }
@@ -399,9 +402,9 @@
                     <button id="userDropdownButton" class="flex items-center space-x-2 hover:bg-gray-50 rounded-lg p-2 transition-colors duration-200">
                         <div class="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
                             @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->profile_picture)
-                                <img src="{{ asset('storage/' . Auth::guard('admin')->user()->profile_picture) }}">
+                                <img src="{{ media_url(Auth::guard('admin')->user()->profile_picture) }}">
                             @elseif(Auth::guard('web')->check() && Auth::guard('web')->user()->profile_picture)
-                                <img src="{{ asset('storage/' . Auth::guard('web')->user()->profile_picture) }}">
+                                <img src="{{ media_url(Auth::guard('web')->user()->profile_picture) }}">
                             @endif
                         </div>
                         <span class="text-sm font-medium text-gray-700">
@@ -487,12 +490,21 @@
                 </svg>
                 <span>Feedback</span>
             </a>
+
+            <a href="{{ route('subscription.index') }}" class="nav-item flex items-center px-4 py-3 text-sm font-medium rounded-lg">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                </svg>
+                <span>Subscriptions</span>
+            </a>
         </nav>
     </aside>
     <!-- Overlay for mobile -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-30 z-20 hidden md:hidden"></div>
     <!-- Main Content -->
-    <main class="flex-1">
+    <main class="flex-1 min-w-0">
+        @include('partials.flash')
         @yield('content')
     </main>
 </div>
@@ -530,7 +542,8 @@
     const navItems = document.querySelectorAll('.nav-item');
     navItems.forEach(item => {
         const link = item.getAttribute('href');
-        if (link === currentPath || (currentPath === '/' && link === '/')) {
+        const linkPath = new URL(link, window.location.origin).pathname;
+        if (currentPath === linkPath || currentPath.startsWith(linkPath + '/')) {
             item.classList.add('active');
         } else {
             item.classList.remove('active');

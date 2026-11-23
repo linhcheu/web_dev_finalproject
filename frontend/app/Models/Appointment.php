@@ -2,98 +2,46 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Carbon;
 
-class Appointment extends Model
+class Appointment extends ApiModel
 {
-    use HasFactory;
-
     protected $primaryKey = 'appointment_id';
-
-    protected $fillable = [
-        'user_id',
-        'hospital_id',
-        'appointment_date',
-        'appointment_time',
-        'patient_phone',
-        'symptom',
-        'status',
-    ];
 
     protected $casts = [
         'appointment_date' => 'date',
-        'appointment_time' => 'datetime:H:i',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Relationships
-    public function user()
+    protected array $apiRelations = [
+        'user' => [User::class, false],
+        'hospital' => [Hospital::class, false],
+    ];
+
+    public function isUpcoming(): bool
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->appointment_date?->gte(today()) ?? false;
     }
 
-    public function hospital()
+    public function getFormattedDateAttribute(): string
     {
-        return $this->belongsTo(Hospital::class, 'hospital_id');
+        return $this->appointment_date?->format('F j, Y') ?? '';
     }
 
-    // Scopes
-    public function scopeUpcoming($query)
+    public function getFormattedTimeAttribute(): ?string
     {
-        return $query->where('appointment_date', '>=', now()->toDateString());
+        return $this->appointment_time ? Carbon::parse($this->appointment_time)->format('g:i A') : null;
     }
 
-    public function scopePast($query)
+    public function getTimeUntilAttribute(): string
     {
-        return $query->where('appointment_date', '<', now()->toDateString());
-    }
+        $days = (int) today()->diffInDays($this->appointment_date, false);
 
-    public function scopeByHospital($query, $hospitalId)
-    {
-        return $query->where('hospital_id', $hospitalId);
-    }
-
-    public function scopeByUser($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    // Methods
-    public function isUpcoming()
-    {
-        return $this->appointment_date >= now()->toDateString();
-    }
-
-    public function isPast()
-    {
-        return $this->appointment_date < now()->toDateString();
-    }
-
-    public function getFormattedDateAttribute()
-    {
-        return $this->appointment_date->format('F j, Y');
-    }
-
-    public function getFormattedTimeAttribute()
-    {
-        if ($this->appointment_time) {
-            return \Carbon\Carbon::parse($this->appointment_time)->format('g:i A');
-        }
-        return null;
-    }
-
-    public function getTimeUntilAttribute()
-    {
-        $days = now()->diffInDays($this->appointment_date, false);
-        
-        if ($days > 0) {
-            return $days . ' day' . ($days > 1 ? 's' : '') . ' from now';
-        } elseif ($days < 0) {
-            return abs($days) . ' day' . (abs($days) > 1 ? 's' : '') . ' ago';
-        } else {
-            return 'Today';
-        }
+        return match (true) {
+            $days > 0 => $days.' day'.($days > 1 ? 's' : '').' from now',
+            $days < 0 => abs($days).' day'.($days < -1 ? 's' : '').' ago',
+            default => 'Today',
+        };
     }
 }
