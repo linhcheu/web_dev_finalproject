@@ -62,7 +62,7 @@
             width: 45px;
             height: 45px;
             border-radius: 50%;
-            background-color: #3b82f6;
+            background-color: var(--cc-primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -127,7 +127,7 @@
         }
         
         .pagination button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             color: white;
             border-color: transparent;
         }
@@ -197,29 +197,7 @@
                     </div>
                 @endforeach
 
-                @if($feedback->hasPages())
-                    <div class="pagination">
-                        @if($feedback->onFirstPage())
-                            <button disabled>&lt;</button>
-                        @else
-                            <a href="{{ $feedback->previousPageUrl() }}"><button>&lt;</button></a>
-                        @endif
-
-                        @foreach($feedback->getUrlRange(1, $feedback->lastPage()) as $page => $url)
-                            @if($page == $feedback->currentPage())
-                                <button class="active">{{ $page }}</button>
-                            @else
-                                <a href="{{ $url }}"><button>{{ $page }}</button></a>
-                            @endif
-                        @endforeach
-
-                        @if($feedback->hasMorePages())
-                            <a href="{{ $feedback->nextPageUrl() }}"><button>&gt;</button></a>
-                        @else
-                            <button disabled>&gt;</button>
-                        @endif
-                    </div>
-                @endif
+                @include('partials.pagination', ['paginator' => $feedback])
             @else
                 <div class="empty-state">
                     <p>No feedback found</p>

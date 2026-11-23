@@ -29,7 +29,7 @@
         .main {
             flex-grow: 1;
             padding: 30px;
-            background: linear-gradient(135deg, #c3c5d3 0%, #b3b0b6 100%);
+            background: var(--cc-bg);
             min-height: calc(100vh - 64px);
         }
 
@@ -46,7 +46,7 @@
         }
 
         .appointment-info {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            background: #ffffff;
             padding: 25px;
             border-radius: 15px;
             margin-bottom: 30px;
@@ -147,8 +147,8 @@
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: var(--cc-primary);
+            box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.1);
             transform: translateY(-2px);
             background: white;
         }
@@ -175,18 +175,18 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(14, 116, 144, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(14, 116, 144, 0.4);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: #475569;
             color: white;
             box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
         }
@@ -214,7 +214,7 @@
             font-size: 14px;
             margin-bottom: 25px;
             padding: 15px;
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            background: #ecfdf5;
             border-radius: 12px;
             border: 1px solid #10b981;
             display: flex;
@@ -229,7 +229,7 @@
         }
 
         .section-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -241,7 +241,7 @@
         }
 
         .page-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -259,12 +259,12 @@
             transform: translateX(-50%);
             width: 60px;
             height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             border-radius: 2px;
         }
 
         .basic-info-section {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            background: var(--cc-primary-soft);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 25px;
@@ -280,11 +280,11 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #0ea5e9, #0284c7);
+            background: var(--cc-primary);
         }
 
         .status-section {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            background: #fef2f2;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 25px;
@@ -300,18 +300,18 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #ef4444, #dc2626);
+            background: var(--cc-danger);
         }
 
         .basic-info-section .section-title {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .status-section .section-title {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;

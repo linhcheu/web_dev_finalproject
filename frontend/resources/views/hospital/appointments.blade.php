@@ -29,6 +29,7 @@
                         <option value="">All Status</option>
                         <option value="upcoming" @if(request('status') == 'upcoming') selected @endif>Upcoming</option>
                         <option value="completed" @if(request('status') == 'completed') selected @endif>Completed</option>
+                        <option value="no_show" @if(request('status') == 'no_show') selected @endif>No show</option>
                     </select>
                     @if(request('phone'))
                         <input type="hidden" name="phone" value="{{ request('phone') }}">
@@ -57,25 +58,27 @@
                     <tbody>
                         @forelse($appointments as $appointment)
                             <tr>
-                                <td>{{ $appointment->user->first_name }} {{ $appointment->user->last_name }}</td>
-                                <td>{{ $appointment->user->email }}</td>
+                                <td style="font-weight:600;">{{ $appointment->user?->full_name ?? '—' }}</td>
+                                <td>{{ $appointment->user?->email }}</td>
                                 <td>{{ $appointment->patient_phone }}</td>
-                                <td>{{ $appointment->appointment_date }}</td>
-                                <td>{{ $appointment->appointment_time }}</td>
+                                <td style="white-space:nowrap;">{{ $appointment->appointment_date?->format('M j, Y') }}</td>
+                                <td style="white-space:nowrap;">{{ $appointment->formatted_time }}</td>
                                 <td>
                                     <span class="status-badge status-{{ $appointment->status }}">
-                                        {{ ucfirst($appointment->status) }}
+                                        {{ str_replace('_', ' ', $appointment->status) }}
                                     </span>
                                 </td>
                                 <td>
-                                    <form method="POST" action="{{ route('hospital.appointments.update', $appointment->appointment_id) }}">
+                                    <form method="POST" action="{{ route('hospital.appointments.update', $appointment->appointment_id) }}" style="display:flex;gap:.5rem;align-items:center;">
                                         @csrf
                                         @method('PUT')
-                                        <select name="status" class="form-control form-control-sm">
-                                            <option value="upcoming" @if($appointment->status == 'upcoming') selected @endif>Upcoming</option>
-                                            <option value="completed" @if($appointment->status == 'completed') selected @endif>Completed</option>
+                                        <label class="sr-only" for="status-{{ $appointment->appointment_id }}">Status</label>
+                                        <select id="status-{{ $appointment->appointment_id }}" name="status" class="form-control form-control-sm" style="min-width:140px;">
+                                            @foreach(['upcoming' => 'Upcoming', 'completed' => 'Completed', 'no_show' => 'No show'] as $value => $label)
+                                                <option value="{{ $value }}" @selected($appointment->status === $value)>{{ $label }}</option>
+                                            @endforeach
                                         </select>
-                                        <button type="submit" class="btn btn-primary btn-sm mt-1"><i class="fas fa-save"></i> Update</button>
+                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
                                     </form>
                                 </td>
                             </tr>

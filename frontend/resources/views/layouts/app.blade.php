@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'CareConnect - Connecting Users with Hospitals')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @yield('styles')
@@ -561,16 +564,16 @@
                 </a>
             </div>
             <div class="nav-menu" id="mainNavMenu">
-                <a href="{{ route('hospitals.index') }}" class="nav-link">Hospitals</a>
-                <a href="{{ route('subscription_view') }}" class="nav-link">Subscription Plans</a>
-                <a href="{{ route('about') }}" class="nav-link">About Us</a>
+                <a href="{{ route('hospitals.index') }}" class="nav-link {{ request()->routeIs('hospitals.*') ? 'is-active' : '' }}">Hospitals</a>
+                <a href="{{ route('subscription_view') }}" class="nav-link {{ request()->routeIs('subscription_view') ? 'is-active' : '' }}">Subscription Plans</a>
+                <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'is-active' : '' }}">About Us</a>
                 @auth
                     <div class="user-menu" style="display:inline-block;position:relative;">
                         <button class="user-menu-btn" id="userMenuBtn" type="button" aria-haspopup="true" aria-expanded="false" tabindex="0">
                             @if(auth()->user()->profile_picture)
                                 <img src="{{ media_url(auth()->user()->profile_picture) }}" alt="Profile" class="user-avatar">
                             @else
-                                <img src="https://ui-avatars.com/api/?name={{ auth()->user()->first_name }}" alt="Profile" class="user-avatar">
+                                <span class="avatar-initials" aria-hidden="true">{{ strtoupper(mb_substr(auth()->user()->first_name, 0, 1).mb_substr(auth()->user()->last_name, 0, 1)) }}</span>
                             @endif
                             <span>{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}</span>
                             <i class="fas fa-chevron-down"></i>
@@ -594,8 +597,8 @@
                         </div>
                     </div>
                 @else
-                    <a href="{{ route('login') }}" class="nav-link">Login</a>
-                    <a href="{{ route('register') }}" class="nav-link">Sign Up</a>
+                    <a href="{{ route('login') }}" class="nav-link {{ request()->routeIs('login') ? 'is-active' : '' }}">Log in</a>
+                    <a href="{{ route('register') }}" class="nav-link nav-cta">Sign up</a>
                 @endauth
             </div>
             <div class="nav-auth" style="display:none;"></div>
@@ -631,15 +634,15 @@
                 <div class="footer-section">
                     <h3><i class="fas fa-envelope"></i> Connect With Us</h3>
                     <ul>
-                        <li><a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a></li>
-                        <li><a href="https://twitter.com" target="_blank"><i class="fab fa-twitter"></i> Twitter</a></li>
-                        <li><a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a></li>
+                        <li><a href="https://facebook.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook"></i> Facebook</a></li>
+                        <li><a href="https://twitter.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i> Twitter</a></li>
+                        <li><a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i> Instagram</a></li>
                     
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 CareConnect. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} CareConnect. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -799,25 +802,27 @@
             });
         });
 
-        // Enhanced card animations on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
+        // Cards fade in as they scroll into view. Skipped for people who prefer
+        // reduced motion, and cards already on screen are never hidden.
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+            document.querySelectorAll('.card, .profile-card, .form-card, .info-card, .sidebar-card, .dashboard-card, .subscription-card, .hospital-card, .appointment-card, .stat-card').forEach(card => {
+                if (card.getBoundingClientRect().top < window.innerHeight) return; // visible already
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(24px)';
+                card.style.transition = 'opacity .5s ease, transform .5s ease';
+                revealObserver.observe(card);
             });
-        }, observerOptions);
-        document.querySelectorAll('.card, .profile-card, .form-card, .info-card, .sidebar-card, .dashboard-card, .subscription-card, .hospital-card, .appointment-card, .stat-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
+        }
 
         // Enhanced loading states
         document.querySelectorAll('form').forEach(form => {
@@ -877,5 +882,7 @@
         });
     </script>
     @yield('scripts')
+    {{-- Design system last, so it wins over per-page styles --}}
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 </body>
 </html>

@@ -13,7 +13,7 @@
     .checkbox { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
     .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
     .actions a, .actions button { padding: 10px 20px; border-radius: 10px; font-weight: 600; border: 0; cursor: pointer; text-decoration: none; }
-    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary { background: var(--cc-primary); color: #fff; }
     .btn-secondary { background: #f3f4f6; color: #111827; }
     @media (max-width: 640px) {
         .sub-edit { padding: 16px; }

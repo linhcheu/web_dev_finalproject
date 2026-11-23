@@ -34,7 +34,7 @@
         .main {
             flex-grow: 1;
             padding: 30px;
-            background: linear-gradient(135deg, #c3c5d3 0%, #b3b0b6 100%);
+            background: var(--cc-bg);
             min-height: calc(100vh - 64px);
         }
 
@@ -142,8 +142,8 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: var(--cc-primary);
+            box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.1);
             transform: translateY(-2px);
             background: white;
         }
@@ -165,18 +165,18 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(14, 116, 144, 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(14, 116, 144, 0.4);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: #475569;
             color: white;
             box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
         }
@@ -206,7 +206,7 @@
             font-size: 14px;
             margin-bottom: 25px;
             padding: 15px;
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            background: #ecfdf5;
             border-radius: 12px;
             border: 1px solid #10b981;
             display: flex;
@@ -222,7 +222,7 @@
         }
 
         .password-section {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            background: #fef2f2;
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 25px;
@@ -238,7 +238,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #ef4444, #dc2626);
+            background: var(--cc-danger);
         }
 
         .password-toggle {
@@ -264,12 +264,12 @@
         }
 
         .password-toggle button:hover {
-            background: rgba(102, 126, 234, 0.1);
-            color: #667eea;
+            background: rgba(14, 116, 144, 0.1);
+            color: var(--cc-primary);
         }
 
         .section-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -283,7 +283,7 @@
         }
 
         .page-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -302,7 +302,7 @@
             transform: translateX(-50%);
             width: 60px;
             height: 3px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             border-radius: 2px;
         }
 
@@ -352,7 +352,7 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             color: white;
             border: none;
             border-radius: 50%;
@@ -362,13 +362,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(14, 116, 144, 0.3);
             transition: all 0.3s ease;
         }
 
         .profile-picture-upload:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(14, 116, 144, 0.4);
         }
 
         .profile-picture-input {
@@ -400,14 +400,14 @@
         }
         
         .upload-area:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
+            border-color: var(--cc-primary);
+            background: rgba(14, 116, 144, 0.05);
             transform: translateY(-2px);
         }
         
         .upload-area.dragover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.1);
+            border-color: var(--cc-primary);
+            background: rgba(14, 116, 144, 0.1);
             transform: scale(1.02);
         }
         
@@ -417,7 +417,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(102, 126, 234, 0.9);
+            background: rgba(14, 116, 144, 0.9);
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
@@ -440,7 +440,7 @@
         
         .upload-icon {
             font-size: 48px;
-            color: #667eea;
+            color: var(--cc-primary);
             margin-bottom: 15px;
         }
         
@@ -466,10 +466,10 @@
         
         .upload-btn {
             padding: 8px 16px;
-            border: 2px solid #667eea;
+            border: 2px solid var(--cc-primary);
             border-radius: 8px;
             background: white;
-            color: #667eea;
+            color: var(--cc-primary);
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
@@ -480,7 +480,7 @@
         }
         
         .upload-btn:hover {
-            background: #667eea;
+            background: var(--cc-primary);
             color: white;
             transform: translateY(-1px);
         }
@@ -498,7 +498,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(102, 126, 234, 0.9);
+            background: rgba(14, 116, 144, 0.9);
             color: white;
             padding: 10px 15px;
             border-radius: 8px;
@@ -537,7 +537,7 @@
         }
         
         .image-ready-indicator {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--cc-success);
             color: white;
             padding: 8px 16px;
             border-radius: 8px;
@@ -556,7 +556,7 @@
         }
 
         .basic-info-section {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            background: var(--cc-primary-soft);
             padding: 30px;
             border-radius: 15px;
             margin-bottom: 25px;
@@ -572,7 +572,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #0ea5e9, #0284c7);
+            background: var(--cc-primary);
         }
 
         .email-section {
@@ -596,7 +596,7 @@
         }
 
         .basic-info-section .section-title {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            background: var(--cc-primary);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -610,7 +610,7 @@
         }
 
         .password-section .section-title {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;

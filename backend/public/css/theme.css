@@ -1,0 +1,245 @@
+/*
+ * CareConnect admin panel design system: loaded last (layouts/app.blade.php)
+ * so it wins over each page's own <style> block. Same tokens as the website.
+ */
+
+/* ------------------------------------------------------------------ tokens */
+:root {
+    --cc-primary: #0e7490;
+    --cc-primary-hover: #155e75;
+    --cc-primary-soft: #ecfeff;
+    --cc-primary-ring: rgba(14, 116, 144, .25);
+
+    --cc-text: #0f172a;
+    --cc-text-muted: #64748b;
+    --cc-border: #e2e8f0;
+    --cc-surface: #ffffff;
+    --cc-bg: #f6f8fb;
+
+    --cc-success: #15803d;  --cc-success-soft: #dcfce7;
+    --cc-warning: #b45309;  --cc-warning-soft: #fef3c7;
+    --cc-danger:  #b91c1c;  --cc-danger-soft:  #fee2e2;
+    --cc-info:    #1d4ed8;  --cc-info-soft:    #dbeafe;
+
+    --cc-radius-sm: 8px;
+    --cc-radius: 12px;
+    --cc-radius-lg: 16px;
+    --cc-shadow-sm: 0 1px 2px rgba(15, 23, 42, .06);
+    --cc-shadow: 0 1px 3px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .05);
+    --cc-shadow-lg: 0 12px 40px rgba(15, 23, 42, .14);
+    --cc-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ------------------------------------------------------------------- base */
+body {
+    font-family: var(--cc-font) !important;
+    background: var(--cc-bg) !important;
+    color: var(--cc-text);
+    -webkit-font-smoothing: antialiased;
+}
+:focus-visible { outline: 3px solid var(--cc-primary-ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+.main, main > div:not(.flash-stack) { background: transparent !important; }
+.page-title, .main h1, .main h2 { color: var(--cc-text) !important; letter-spacing: -0.015em; }
+
+/* ------------------------------------------------------------ header + nav */
+body > header { border-bottom: 1px solid var(--cc-border) !important; box-shadow: none !important; }
+#sidebar { border-right: 1px solid var(--cc-border); box-shadow: none !important; }
+.nav-item {
+    color: #475569 !important;
+    border-radius: var(--cc-radius-sm) !important;
+    position: relative;
+    animation: none !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+.nav-item:hover { background: #f1f5f9 !important; color: var(--cc-text) !important; }
+.nav-item.active {
+    background: var(--cc-primary-soft) !important;
+    color: var(--cc-primary) !important;
+    font-weight: 600;
+}
+.nav-item.active::before {
+    content: ""; position: absolute; left: -16px; top: 8px; bottom: 8px; width: 3px;
+    border-radius: 0 3px 3px 0; background: var(--cc-primary);
+}
+.nav-item svg { opacity: .85; }
+
+/* user dropdown */
+#userDropdownButton { border: 1px solid var(--cc-border); border-radius: 999px !important; padding: 4px 12px 4px 4px !important; }
+#userDropdownButton img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.dropdown-menu {
+    border: 1px solid var(--cc-border) !important;
+    border-radius: var(--cc-radius) !important;
+    box-shadow: var(--cc-shadow-lg) !important;
+    padding: 6px !important;
+}
+.dropdown-menu a, .dropdown-menu button { border-radius: var(--cc-radius-sm); }
+
+/* ------------------------------------------------------------------ cards */
+.stat-card, .appointments-box, .appointments-table, .section-container, .form-container,
+.section, .filter-section, .table-container, .card, .info-card, .profile-section {
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-border) !important;
+    border-radius: var(--cc-radius-lg) !important;
+    box-shadow: var(--cc-shadow) !important;
+}
+.stat-card { transition: box-shadow .2s, transform .2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--cc-shadow-lg) !important; }
+.stat-icon { border-radius: var(--cc-radius) !important; }
+.stat-number { color: var(--cc-text) !important; font-weight: 700 !important; letter-spacing: -0.02em; }
+
+/* --------------------------------------------------------------- buttons */
+.btn, .btn-primary, .btn-secondary, .btn-filter, .btn-filter-primary, .btn-filter-secondary,
+button[type="submit"]:not(.dropdown-menu button):not(.flash-close) {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    min-height: 42px;
+    padding: .6rem 1.2rem !important;
+    border-radius: var(--cc-radius-sm) !important;
+    font-family: inherit; font-weight: 600 !important; font-size: .92rem !important;
+    box-shadow: var(--cc-shadow-sm) !important;
+    transform: none !important;
+    transition: background-color .15s, border-color .15s, color .15s;
+    cursor: pointer;
+}
+.btn-primary, .btn-filter-primary, button[type="submit"].btn:not(.btn-secondary):not(.btn-danger) {
+    background: var(--cc-primary) !important; color: #fff !important; border: 1px solid var(--cc-primary) !important;
+}
+.btn-primary:hover, .btn-filter-primary:hover { background: var(--cc-primary-hover) !important; }
+.btn-secondary, .btn-filter-secondary, .btn-cancel {
+    background: var(--cc-surface) !important; color: var(--cc-text) !important; border: 1px solid var(--cc-border) !important;
+}
+.btn-secondary:hover, .btn-filter-secondary:hover, .btn-cancel:hover { background: #f8fafc !important; border-color: #cbd5e1 !important; }
+.btn-danger { background: var(--cc-danger) !important; color: #fff !important; border: 1px solid var(--cc-danger) !important; }
+
+/* small icon actions in tables */
+.action-buttons { flex-wrap: nowrap !important; }
+.action-btn {
+    width: 34px; height: 34px; padding: 0 !important;
+    display: inline-flex !important; align-items: center; justify-content: center;
+    border-radius: var(--cc-radius-sm) !important; border: 1px solid transparent !important;
+    box-shadow: none !important; transform: none !important;
+}
+.action-btn-edit { background: var(--cc-primary-soft) !important; color: var(--cc-primary) !important; }
+.action-btn-edit:hover { background: #cffafe !important; }
+.action-btn-delete { background: var(--cc-danger-soft) !important; color: var(--cc-danger) !important; }
+.action-btn-delete:hover { background: #fecaca !important; }
+.action-btn svg, .action-btn i { width: 16px; height: 16px; }
+
+/* ------------------------------------------------------------------ forms */
+.form-group label, .form-label {
+    font-size: .85rem !important; font-weight: 600 !important; color: #334155 !important;
+    text-transform: none !important; letter-spacing: 0 !important;
+}
+main input[type="text"], main input[type="email"], main input[type="password"], main input[type="tel"],
+main input[type="date"], main input[type="time"], main input[type="number"], main input[type="search"],
+main select, main textarea {
+    min-height: 42px;
+    padding: .55rem .8rem !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: var(--cc-radius-sm) !important;
+    background-color: var(--cc-surface) !important;
+    color: var(--cc-text) !important;
+    font-family: inherit !important; font-size: .93rem !important;
+    box-shadow: var(--cc-shadow-sm) !important;
+    transform: none !important;
+}
+main textarea { min-height: 100px; }
+main input:focus, main select:focus, main textarea:focus {
+    border-color: var(--cc-primary) !important;
+    box-shadow: 0 0 0 4px var(--cc-primary-ring) !important;
+    outline: none !important;
+}
+main input[type="file"] {
+    padding: .45rem !important; border: 1px dashed #cbd5e1 !important; border-radius: var(--cc-radius-sm) !important;
+    background: #f8fafc !important; width: 100%;
+}
+.error, .text-red-500, .invalid-feedback { color: var(--cc-danger) !important; font-size: .82rem; }
+
+/* section headers inside edit pages */
+.section-title, .form-section-title { color: var(--cc-text) !important; }
+
+/* ----------------------------------------------------------------- tables */
+main table { border-collapse: separate !important; border-spacing: 0; }
+main table thead th, main table th {
+    background: #f8fafc !important; color: var(--cc-text-muted) !important;
+    font-size: .72rem !important; font-weight: 700 !important;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: .75rem .9rem !important; white-space: nowrap;
+    border-bottom: 1px solid var(--cc-border) !important;
+}
+main table td {
+    padding: .8rem .9rem !important; vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9 !important; font-size: .9rem;
+    white-space: nowrap;          /* no more "11/04/2 026": the table scrolls instead */
+}
+main table tbody tr:hover td { background: #f8fafc; }
+.overflow-x-auto { border-radius: var(--cc-radius); }
+
+/* ------------------------------------------------------- badges & status */
+.status-badge, .badge, [class*="status-upcoming"], [class*="status-completed"] {
+    display: inline-flex !important; align-items: center;
+    padding: .2rem .65rem !important; border-radius: 999px !important;
+    font-size: .75rem !important; font-weight: 600 !important; line-height: 1.5;
+    white-space: nowrap; text-transform: capitalize; border: 0 !important;
+}
+.status-upcoming, .status-scheduled, .status-pending { background: var(--cc-info-soft) !important; color: var(--cc-info) !important; }
+.status-completed, .status-active, .badge-active { background: var(--cc-success-soft) !important; color: var(--cc-success) !important; }
+.status-cancelled, .status-no_show, .status-rejected, .badge-cancelled { background: var(--cc-danger-soft) !important; color: var(--cc-danger) !important; }
+.status-expired, .badge-expired { background: var(--cc-warning-soft) !important; color: var(--cc-warning) !important; }
+
+/* ------------------------------------------------------------- pagination */
+.pagination { gap: 6px !important; }
+.pagination button {
+    min-width: 36px; height: 36px; border-radius: var(--cc-radius-sm) !important;
+    border: 1px solid var(--cc-border) !important; background: var(--cc-surface) !important;
+    color: #334155 !important; font-weight: 600; box-shadow: none !important;
+}
+.pagination button:hover:not(:disabled) { border-color: var(--cc-primary) !important; color: var(--cc-primary) !important; }
+.pagination button.active { background: var(--cc-primary) !important; border-color: var(--cc-primary) !important; color: #fff !important; }
+.pagination button:disabled { opacity: .45; }
+
+/* ---------------------------------------------------- modal / bottom sheet */
+.modal { background: rgba(15, 23, 42, .45) !important; backdrop-filter: blur(4px); }
+.modal-content {
+    border-radius: var(--cc-radius-lg) !important; border: 1px solid var(--cc-border) !important;
+    box-shadow: var(--cc-shadow-lg) !important;
+}
+@media (max-width: 640px) {
+    .modal-content {
+        position: fixed !important; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
+        width: 100% !important; max-width: none !important; margin: 0 !important; transform: none !important;
+        border-radius: var(--cc-radius-lg) var(--cc-radius-lg) 0 0 !important;
+    }
+}
+
+/* ------------------------------------------------------ edit page sections */
+/* every section is a plain white card; one accent line on top */
+.section-container, .basic-info-section, .email-section, .password-section,
+.profile-picture-section, .status-section {
+    background: var(--cc-surface) !important;
+    border: 1px solid var(--cc-border) !important;
+    border-top: 3px solid var(--cc-primary) !important;
+    border-radius: var(--cc-radius-lg) !important;
+    box-shadow: var(--cc-shadow) !important;
+}
+.password-section, .status-section { border-top-color: #94a3b8 !important; }
+
+/* Tailwind blue buttons in list headers -> brand */
+.bg-blue-500, .bg-blue-600 { background-color: var(--cc-primary) !important; border-color: var(--cc-primary) !important; }
+.hover\:bg-blue-600:hover { background-color: var(--cc-primary-hover) !important; }
+
+/* stat cards: 4 in a row on wide screens */
+.stats-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important; gap: 16px !important; }
+
+/* sidebar stays visible while the page scrolls (tablet + desktop) */
+@media (min-width: 768px) {
+    #sidebar { position: sticky !important; top: 64px; height: calc(100vh - 64px); min-height: 0 !important; overflow-y: auto; }
+}
+
+.pagination-gap { align-self: center; color: var(--cc-text-muted); padding: 0 2px; }
+
+/* subscription list text actions */
+.row-actions .btn-edit, .row-actions .btn-delete { font-weight: 600; }

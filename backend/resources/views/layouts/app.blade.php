@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>CareConnect Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
         @keyframes pulse {
@@ -30,10 +33,10 @@
 
         @keyframes glow {
             0%, 100% {
-                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+                box-shadow: 0 0 5px rgba(14, 116, 144, 0.5);
             }
             50% {
-                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(147, 51, 234, 0.5);
+                box-shadow: 0 0 20px rgba(14, 116, 144, 0.8), 0 0 30px rgba(6, 182, 212, 0.5);
             }
         }
 
@@ -49,10 +52,8 @@
         }
 
         .nav-item.active {
-            animation: slideIn 0.5s ease-out, glow 2s ease-in-out infinite;
-            background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            color: white !important; /* Force white text for active items */
+            background: var(--cc-primary-soft);
+            color: var(--cc-primary) !important;
         }
 
         .nav-item.active::before {
@@ -77,8 +78,7 @@
 
         .nav-item.active svg,
         .nav-item.active span {
-            color: white !important; /* Force white color for active items */
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+            color: var(--cc-primary) !important;
         }
 
         .nav-item:not(.active):hover {
@@ -162,18 +162,18 @@
         }
 
         .action-btn-edit {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: var(--cc-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 15px rgba(14, 116, 144, 0.3);
         }
 
         .action-btn-edit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(14, 116, 144, 0.4);
         }
 
         .action-btn-delete {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
@@ -234,11 +234,11 @@
         }
 
         .notification-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--cc-success);
         }
 
         .notification-error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
         }
 
         /* Loading states */
@@ -550,5 +550,7 @@
         }
     });
 </script>
+{{-- Design system last, so it wins over per-page styles --}}
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 </body>
 </html>

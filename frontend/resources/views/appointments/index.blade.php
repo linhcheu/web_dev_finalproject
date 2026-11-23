@@ -23,21 +23,21 @@
             <div class="stat-card card" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);border-radius:1.2rem;box-shadow:0 2px 8px 0 rgba(0,0,0,0.07);padding:1.2rem;display:flex;align-items:center;gap:1rem;">
                 <div class="stat-icon"><i class="fas fa-calendar-check" style="font-size:1.7rem;color:var(--primary-color);"></i></div>
                 <div class="stat-content">
-                    <h3>{{ $appointments->where('appointment_date', '>=', now()->toDateString())->count() }}</h3>
+                    <h3>{{ $appointments->filter(fn ($a) => $a->appointment_date?->gte(today()))->count() }}</h3>
                     <p>Upcoming</p>
                 </div>
             </div>
             <div class="stat-card card" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);border-radius:1.2rem;box-shadow:0 2px 8px 0 rgba(0,0,0,0.07);padding:1.2rem;display:flex;align-items:center;gap:1rem;">
                 <div class="stat-icon"><i class="fas fa-history" style="font-size:1.7rem;color:#64748b;"></i></div>
                 <div class="stat-content">
-                    <h3>{{ $appointments->where('appointment_date', '<', now()->toDateString())->count() }}</h3>
+                    <h3>{{ $appointments->filter(fn ($a) => $a->appointment_date?->lt(today()))->count() }}</h3>
                     <p>Past</p>
                 </div>
             </div>
             <div class="stat-card card" style="background:rgba(255,255,255,0.85);backdrop-filter:blur(6px);border-radius:1.2rem;box-shadow:0 2px 8px 0 rgba(0,0,0,0.07);padding:1.2rem;display:flex;align-items:center;gap:1rem;">
                 <div class="stat-icon"><i class="fas fa-calendar-day" style="font-size:1.7rem;color:#f59e42;"></i></div>
                 <div class="stat-content">
-                    <h3>{{ $appointments->where('appointment_date', '=', now()->toDateString())->count() }}</h3>
+                    <h3>{{ $appointments->filter(fn ($a) => $a->appointment_date?->isToday())->count() }}</h3>
                     <p>Today</p>
                 </div>
             </div>

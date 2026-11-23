@@ -19,7 +19,7 @@
     .main {
         flex-grow: 1;
         padding: 30px;
-        background: linear-gradient(135deg, #c3c5d3 0%, #b3b0b6 100%);
+        background: var(--cc-bg);
         min-height: calc(100vh - 64px);
     }
     .form-container {
@@ -38,12 +38,12 @@
         border-radius: 15px;
         padding: 30px;
         margin-bottom: 30px;
-        border: 1px solid rgba(102, 126, 234, 0.1);
+        border: 1px solid rgba(14, 116, 144, 0.1);
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
         animation: slideIn 0.6s ease-out;
     }
     .section-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--cc-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -56,7 +56,7 @@
         z-index: 1;
     }
     .page-title {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--cc-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -74,7 +74,7 @@
         transform: translateX(-50%);
         width: 60px;
         height: 3px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--cc-primary);
         border-radius: 2px;
     }
     .form-row {
@@ -113,8 +113,8 @@
     .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        border-color: var(--cc-primary);
+        box-shadow: 0 0 0 4px rgba(14, 116, 144, 0.1);
         transform: translateY(-2px);
         background: white;
     }
@@ -138,15 +138,15 @@
         overflow: hidden;
     }
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--cc-primary);
         color: white;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(14, 116, 144, 0.3);
         width: 100%;
         margin-top: 10px;
     }
     .btn-primary:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 8px 25px rgba(14, 116, 144, 0.4);
     }
     .error {
         color: #dc2626;
@@ -166,7 +166,7 @@
         font-size: 14px;
         margin-bottom: 25px;
         padding: 15px;
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #ecfdf5;
         border-radius: 12px;
         border: 1px solid #10b981;
         display: flex;
@@ -271,14 +271,14 @@
     }
     
     .upload-area:hover {
-        border-color: #667eea;
-        background: rgba(102, 126, 234, 0.05);
+        border-color: var(--cc-primary);
+        background: rgba(14, 116, 144, 0.05);
         transform: translateY(-2px);
     }
     
     .upload-area.dragover {
-        border-color: #667eea;
-        background: rgba(102, 126, 234, 0.1);
+        border-color: var(--cc-primary);
+        background: rgba(14, 116, 144, 0.1);
         transform: scale(1.02);
     }
     
@@ -288,7 +288,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(102, 126, 234, 0.9);
+        background: rgba(14, 116, 144, 0.9);
         color: white;
         padding: 10px 20px;
         border-radius: 8px;
@@ -311,7 +311,7 @@
     
     .upload-icon {
         font-size: 48px;
-        color: #667eea;
+        color: var(--cc-primary);
         margin-bottom: 15px;
     }
     
@@ -337,10 +337,10 @@
     
     .upload-btn {
         padding: 8px 16px;
-        border: 2px solid #667eea;
+        border: 2px solid var(--cc-primary);
         border-radius: 8px;
         background: white;
-        color: #667eea;
+        color: var(--cc-primary);
         font-weight: 600;
         font-size: 14px;
         cursor: pointer;
@@ -351,7 +351,7 @@
     }
     
     .upload-btn:hover {
-        background: #667eea;
+        background: var(--cc-primary);
         color: white;
         transform: translateY(-1px);
     }
@@ -369,7 +369,7 @@
         position: fixed;
         top: 20px;
         right: 20px;
-        background: rgba(102, 126, 234, 0.9);
+        background: rgba(14, 116, 144, 0.9);
         color: white;
         padding: 10px 15px;
         border-radius: 8px;
@@ -379,7 +379,7 @@
     }
     
     .image-ready-indicator {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: var(--cc-success);
         color: white;
         padding: 8px 16px;
         border-radius: 8px;

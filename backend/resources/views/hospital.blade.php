@@ -34,7 +34,7 @@
             justify-content: center;
             font-size: 24px;
         }
-        .stat-icon.hospitals { background-color: #f3e8ff; color: #9333ea; }
+        .stat-icon.hospitals { background-color: #f3e8ff; color: var(--cc-primary); }
         .stat-info h3 {
             color: #6b7280;
             font-size: 14px;
@@ -96,14 +96,14 @@
             height: 32px;
         }
         .action-btn-edit, .btn-edit {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: var(--cc-primary);
             color: white;
         }
         .action-btn-edit:hover, .btn-edit:hover {
-            background: #2563eb;
+            background: var(--cc-primary);
         }
         .action-btn-delete, .btn-delete {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
             color: white;
         }
         .action-btn-delete:hover, .btn-delete:hover {
@@ -126,7 +126,7 @@
             cursor: pointer;
         }
         .pagination .active {
-            background-color: #7b61ff;
+            background-color: var(--cc-primary);
             color: white;
         }
         .loading {
@@ -149,10 +149,10 @@
             transform: translateX(0);
         }
         .notification.success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--cc-success);
         }
         .notification.error {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
         }
         .modal {
             display: none;
@@ -186,7 +186,7 @@
             margin-top: 25px;
         }
         .btn-cancel {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: #475569;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -195,7 +195,7 @@
             font-weight: 600;
         }
         .btn-confirm {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: var(--cc-danger);
             color: white;
             padding: 10px 20px;
             border: none;
@@ -257,8 +257,8 @@
         .filter-group input:focus,
         .filter-group select:focus {
             outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: var(--cc-primary);
+            box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.1);
         }
         
         .filter-actions {
@@ -284,22 +284,22 @@
         }
         
         .btn-filter-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: var(--cc-primary);
             color: white;
         }
         
         .btn-filter-primary:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            background: var(--cc-primary-hover);
             transform: translateY(-1px);
         }
         
         .btn-filter-secondary {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: #475569;
             color: white;
         }
         
         .btn-filter-secondary:hover {
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            background: #334155;
             transform: translateY(-1px);
         }
         
@@ -314,7 +314,7 @@
         }
         
         .filter-tag {
-            background: #3b82f6;
+            background: var(--cc-primary);
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
@@ -671,27 +671,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                @if($hospitals->hasPages())
-                    <div class="pagination">
-                        @if($hospitals->onFirstPage())
-                            <button disabled>&lt;</button>
-                        @else
-                            <a href="{{ $hospitals->previousPageUrl() }}"><button>&lt;</button></a>
-                        @endif
-                        @foreach($hospitals->getUrlRange(1, $hospitals->lastPage()) as $page => $url)
-                            @if($page == $hospitals->currentPage())
-                                <button class="active">{{ $page }}</button>
-                            @else
-                                <a href="{{ $url }}"><button>{{ $page }}</button></a>
-                            @endif
-                        @endforeach
-                        @if($hospitals->hasMorePages())
-                            <a href="{{ $hospitals->nextPageUrl() }}"><button>&gt;</button></a>
-                        @else
-                            <button disabled>&gt;</button>
-                        @endif
-                    </div>
-                @endif
+                @include('partials.pagination', ['paginator' => $hospitals])
             </div>
         </div>
     </div>

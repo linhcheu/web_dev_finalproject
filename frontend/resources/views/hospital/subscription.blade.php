@@ -9,11 +9,6 @@
             <h1>Subscription Management</h1>
             <p>View and manage your hospital's subscription plan</p>
         </div>
-        <!-- Image Placeholder: Add your static image here -->
-        <div class="image-placeholder" style="width:100%;max-width:420px;height:180px;margin:0 auto 2rem auto;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e0e7ef 60%,#f8fafc 100%);border-radius:1rem;box-shadow:0 2px 12px rgba(0,0,0,0.07);color:#b0b7c3;font-size:1.1rem;">
-            <!-- Example: <img src="{{ asset('images/subscription-hero.png') }}" alt="Subscription Image" style="max-width:100%;max-height:100%;border-radius:1rem;" /> -->
-            <span>Image Placeholder</span>
-        </div>
 
         <div class="subscription-content">
             @if($subscription)
@@ -27,8 +22,9 @@
                     </div>
                 </div>
 
-                @if($subscription->end_date && $subscription->end_date->diffInDays(now()) <= 3 && $subscription->status === 'active')
-                    <div class="alert alert-warning" style="margin-bottom:1rem;">Your subscription will expire in {{ $subscription->end_date->diffInDays(now()) }} day(s). Please renew to avoid interruption.</div>
+                @php($daysLeft = $subscription->end_date ? (int) today()->diffInDays($subscription->end_date, false) : null)
+                @if($daysLeft !== null && $daysLeft >= 0 && $daysLeft <= 30 && $subscription->status === 'active')
+                    <div class="alert alert-warning" style="margin-bottom:1rem;">Your subscription expires in {{ $daysLeft }} {{ Str::plural('day', $daysLeft) }}. Please renew to avoid interruption.</div>
                 @endif
             @else
                 <div class="subscription-card">

@@ -8,7 +8,7 @@
     .sub-summary h1 { font-size: 2rem; }
     .sub-filter { display: flex; gap: 8px; flex-wrap: wrap; }
     .sub-filter a { padding: 6px 14px; border-radius: 999px; border: 1px solid #e5e7eb; color: #374151; text-decoration: none; font-size: 14px; }
-    .sub-filter a.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+    .sub-filter a.active { background: var(--cc-primary); border-color: var(--cc-primary); color: #fff; }
     .sub-table { width: 100%; border-collapse: collapse; }
     .sub-table th, .sub-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
     .sub-table th { color: #6b7280; font-weight: 600; text-transform: uppercase; font-size: 12px; }
@@ -18,11 +18,11 @@
     .badge-cancelled { background: #fee2e2; color: #991b1b; }
     .row-actions { display: flex; gap: 8px; }
     .row-actions a, .row-actions button { padding: 6px 12px; border-radius: 8px; font-size: 13px; border: 0; cursor: pointer; text-decoration: none; }
-    .btn-edit { background: #eff6ff; color: #1d4ed8; }
+    .btn-edit { background: #eff6ff; color: var(--cc-primary-hover); }
     .btn-delete { background: #fef2f2; color: #b91c1c; }
     .pagination { display: flex; gap: 6px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
     .pagination button { min-width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; }
-    .pagination button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+    .pagination button.active { background: var(--cc-primary); color: #fff; border-color: var(--cc-primary); }
 
     /* Phones and tablets (the sidebar takes space): each row becomes a card */
     @media (max-width: 900px) {

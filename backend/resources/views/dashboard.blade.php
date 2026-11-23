@@ -40,9 +40,9 @@
             font-size: 24px;
         }
 
-        .stat-icon.users { background-color: #dbeafe; color: #1d4ed8; }
+        .stat-icon.users { background-color: #dbeafe; color: var(--cc-primary-hover); }
         .stat-icon.appointments { background-color: #dcfce7; color: #16a34a; }
-        .stat-icon.hospitals { background-color: #f3e8ff; color: #9333ea; }
+        .stat-icon.hospitals { background-color: #f3e8ff; color: var(--cc-primary); }
         .stat-icon.feedback { background-color: #fef3c7; color: #d97706; }
 
         .stat-info h3 {
@@ -96,9 +96,9 @@
             font-size: 16px;
         }
 
-        .activity-icon.users { background-color: #dbeafe; color: #1d4ed8; }
+        .activity-icon.users { background-color: #dbeafe; color: var(--cc-primary-hover); }
         .activity-icon.appointments { background-color: #dcfce7; color: #16a34a; }
-        .activity-icon.hospitals { background-color: #f3e8ff; color: #9333ea; }
+        .activity-icon.hospitals { background-color: #f3e8ff; color: var(--cc-primary); }
 
         .activity-content {
             flex: 1;

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - CareConnect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     <style>
         @keyframes fadeInUp {
@@ -37,7 +40,7 @@
         }
 
         .gradient-bg {
-            background: linear-gradient(-45deg, #3550cb, #0b5aa6, #1d13aa, #0e3cd1);
+            background: linear-gradient(-45deg, #0e7490, #0891b2, #155e75, #06b6d4);
             background-size: 400% 400%;
             animation: gradient 15s ease infinite;
         }
@@ -178,5 +181,7 @@
             </div>
         </div>
     </div>
+{{-- Design system last, so it wins over per-page styles --}}
+<link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 </body>
 </html>

@@ -18,7 +18,7 @@
         .main {
             flex-grow: 1;
             padding: 30px;
-            background: linear-gradient(135deg, #c3c5d3 0%, #b3b0b6 100%);
+            background: var(--cc-bg);
             min-height: calc(100vh - 64px);
         }
 
@@ -56,9 +56,9 @@
         }
 
         .form-group input:focus, .form-group select:focus {
-            border-color: #667eea;
+            border-color: var(--cc-primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(14, 116, 144, 0.1);
         }
 
         .btn {
@@ -71,7 +71,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--cc-primary);
             color: white;
         }
 
