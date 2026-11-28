@@ -11,18 +11,23 @@ line "Ubuntu";            lsb_release -d 2>/dev/null
 line "Apache";            apache2 -v | head -1
 line "PHP";               php -v | head -1
 line "Composer";          composer --version 2>/dev/null
-line "MySQL";             mysql --version
+line "MySQL";             if command -v mysql >/dev/null; then mysql --version; else echo "not installed here (Mission 5A: MySQL runs on the DB server)"; fi
 line "Firewall (ufw)";    ufw status
 
 line "Apache sites (careconnect, careconnect-admin, careconnect-api)"
 ls /etc/apache2/sites-enabled/
 apache2ctl configtest 2>&1 | tail -1
 
-line "Ports: 80 + 8080 public, 8081 API on 127.0.0.1 only, 3306 MySQL"
+line "Ports: 80 + 8080 public, 8081 API on 127.0.0.1 only, 3306 MySQL (only on a single server)"
 ss -tlnp | grep -E ':(80|8080|8081|3306) ' || echo "nothing listening on 80/8080/8081/3306?!"
 
 line "API: Laravel + MySQL (the only app with a database)"
-cd "$APP/api" && php artisan --version && grep -E '^DB_(CONNECTION|DATABASE|USERNAME)' .env
+cd "$APP/api" && php artisan --version && grep -E '^DB_(CONNECTION|HOST|DATABASE|USERNAME)' .env
+DB_HOST=$(grep -E '^DB_HOST=' .env | cut -d= -f2)
+if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "127.0.0.1" ] && [ "$DB_HOST" != "localhost" ]; then
+    printf 'DB server %s:3306 reachable? ' "$DB_HOST"
+    timeout 3 bash -c "</dev/tcp/$DB_HOST/3306" 2>/dev/null && echo yes || echo "NO - check ufw + bind-address on the DB server"
+fi
 php artisan db:show 2>&1 | head -12
 
 for app in frontend backend; do
